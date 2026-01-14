@@ -1,0 +1,38 @@
+first make server.js with express cors, dotenv app.use app.get appp.listen
+then make .env and add mongo and port
+
+
+//connect mongo
+then make connectDB in config folder db.js to connect mongo
+then in server import connectDB and call
+
+//schema models for user 
+now make models folder
+then add user.js file and make user schema
+
+
+//router
+now make routes folder 
+then make userrouter.js to make router of user data4
+
+
+//controllers
+now userController folder
+then make a usercontroller.js for logic inside that
+make registercontroller
+
+
+
+//JWT workflow
+
+
+1.first install jsonwebtoken
+2. generate token in utils/generateToken.js using JsonWebTokenError.sign(id, secret, exprire)
+3. after user save in controller sendToken(user, res, 201)
+
+so workflow from usercontroller call sendToken(user,res,201) -> sendToken() call generateToken(user.id)-> generateToken() make token using JsonWebTokenError.sign(id, secretkey, expiresIn) 
+->back to generateToken() and get the token then i make a cookie with token res.cookei("token", token) (like key is added in an envelop)
+
+
+4. now make login register and sendToken(user, res, 201) then like before steps it generate store in cookie and logged in
+5. now make Middleware/authMiddleware.js in which isLogin checks identity proof as taken token from res.cookies.token then decode by JsonWebTokenError.verify(token, secretkey)
