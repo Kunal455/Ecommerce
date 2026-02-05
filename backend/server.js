@@ -4,6 +4,7 @@ const colors = require('colors')
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const userRouter = require('./routes/userRouter')
+const ProductRouter = require('./routes/ProductRoute')
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.get("/", (req, res) => {
 
 
 app.use("/api/v3/user", userRouter )
+app.use("/api/v3/product",  ProductRouter)
 
 const PORT = 8000;
 app.listen(PORT, () => {

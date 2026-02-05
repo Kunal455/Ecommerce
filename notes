@@ -38,3 +38,8 @@ so workflow from usercontroller call sendToken(user,res,201) -> sendToken() call
 5. now make Middleware/authMiddleware.js in which isLogin checks identity proof as taken token from res.cookies.token then decode by JsonWebTokenError.verify(token, secretkey) then store in req.user and next
 
 6. now add bcrypt make salt and hash then in loginuser bcrypt.compare
+
+
+
+//product schema
+now make CSSMathProduct.js in models

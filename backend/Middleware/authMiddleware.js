@@ -1,11 +1,13 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
-const isLogin = async (req, res, next) => {
+const protect = async (req, res, next) => {
   try {
     const token = req.cookies.token;
     if (!token) return res.status(401).json({ message: "Not authorized" });
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Cookies:", req.cookies);
+
     req.user = await User.findById(decoded.id).select("-password");
     next();
   } catch (error) {
@@ -13,4 +15,4 @@ const isLogin = async (req, res, next) => {
   }
 };
 
-module.exports = { isLogin };
+module.exports = { protect };
