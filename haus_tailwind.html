@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAUS — E-Commerce UI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Archivo:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          haus: {
+            black: '#0a0a0a', offblack: '#111111', darkgrey: '#1e1e1e', midgrey: '#6b6b6b',
+            lightgrey: '#d4d4d4', palegrey: '#ebebeb', offwhite: '#f5f5f5', white: '#ffffff',
+            red: '#c0392b', success: '#1f6b3e', border: '#e0e0e0',
+          }
+        },
+        fontFamily: { serif: ['"Cormorant Garamond"', 'serif'], sans: ['Archivo', 'sans-serif'] },
+        cursor: { none: 'none' }
+      }
+    }
+  }
+</script>
+<style>
+  body { cursor: none; }
+  .custom-cursor { width:10px; height:10px; background:#0a0a0a; border-radius:50%; position:fixed; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:background 0.2s; }
+  .custom-cursor-ring { width:36px; height:36px; border:1px solid #0a0a0a; border-radius:50%; position:fixed; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); opacity:0.5; transition:width 0.2s, height 0.2s, opacity 0.2s; transition-timing-function: ease-out; }
+  body:hover .custom-cursor { opacity: 1; }
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .pcard-img-hover:hover .pcard-emoji { transform: scale(1.08); filter: grayscale(0); }
+</style>
+</head>
+<body class="font-sans bg-haus-white text-haus-black overflow-x-hidden antialiased">
+<div id="cur" class="custom-cursor hidden md:block"></div>
+<div id="curRing" class="custom-cursor-ring hidden md:block"></div>
+
+<!-- Announcement Bar -->
+<div class="bg-haus-black text-haus-white text-center py-2 px-4 text-[0.65rem] md:text-[0.7rem] tracking-widest uppercase animate-pulse">
+  New SS26 Collection — Free Shipping on Orders over ₹2,999
+</div>
+
+<!-- Navbar -->
+<nav class="sticky top-0 z-40 bg-haus-white/95 backdrop-blur-md border-b border-haus-border flex items-center justify-between px-6 md:px-10 h-16 md:h-[68px]">
+  <div class="hidden md:flex gap-7 items-center">
+    <a href="#" class="text-[0.72rem] tracking-widest uppercase opacity-70 hover:opacity-100 transition duration-300">Women</a>
+    <a href="#" class="text-[0.72rem] tracking-widest uppercase opacity-70 hover:opacity-100 transition duration-300">Men</a>
+    <a href="#" class="text-[0.72rem] tracking-widest uppercase opacity-70 hover:opacity-100 transition duration-300">Accessories</a>
+  </div>
+  <a href="#" class="font-serif text-2xl md:text-3xl font-light tracking-[0.2em] absolute left-1/2 -translate-x-1/2">HAUS</a>
+  <div class="flex gap-4 md:gap-5 items-center">
+    <button class="opacity-75 hover:opacity-100 transition" onclick="alert('Search clicked')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+    <button class="opacity-75 hover:opacity-100 transition relative">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span class="absolute -top-1.5 -right-2 bg-haus-black text-haus-white rounded-full text-[0.55rem] w-4 h-4 flex items-center justify-center font-bold">0</span>
+    </button>
+    <button class="opacity-75 hover:opacity-100 transition relative">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      <span class="absolute -top-1.5 -right-2 bg-haus-black text-haus-white rounded-full text-[0.55rem] w-4 h-4 flex items-center justify-center font-bold">2</span>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="grid grid-cols-1 md:grid-cols-2 min-h-[88vh] border-b border-haus-border">
+  <div class="hidden md:flex bg-haus-offwhite relative overflow-hidden border-r border-haus-border items-center justify-center group">
+    <div class="absolute inset-0 bg-gradient-to-br from-haus-palegrey to-haus-white opacity-80 group-hover:opacity-100 transition-opacity duration-700"></div>
+    <div class="relative z-10 text-[12rem] lg:text-[14rem] grayscale opacity-90 group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700 delay-100">👗</div>
+    <div class="absolute bottom-10 left-10 text-[0.65rem] tracking-widest uppercase text-haus-midgrey z-20 flex items-center gap-2">
+      <div class="w-6 h-px bg-haus-midgrey"></div> SS 2026 Collection
+    </div>
+    <div class="absolute top-10 right-10 font-serif text-6xl font-light text-haus-lightgrey z-20">001</div>
+  </div>
+  <div class="flex flex-col justify-center px-8 py-16 md:p-16 lg:p-20">
+    <div class="text-[0.68rem] tracking-[0.28em] uppercase text-haus-midgrey mb-6 flex items-center gap-3">
+      <div class="w-7 h-px bg-haus-midgrey"></div> New Arrivals
+    </div>
+    <h1 class="font-serif text-5xl md:text-6xl lg:text-7xl font-light leading-tight tracking-tight mb-6 text-haus-black">
+      Dressed for<br><em class="text-haus-midgrey font-light">every chapter</em><br>of life.
+    </h1>
+    <p class="text-sm md:text-[0.9rem] text-haus-midgrey leading-relaxed max-w-[360px] mb-10">
+      Clean lines, honest fabrics, and silhouettes built to outlast any season. Clothing that works as hard as you do, redefined for modern elegance.
+    </p>
+    <div class="flex flex-wrap gap-4 mb-12">
+      <button class="bg-haus-black text-haus-white border border-haus-black px-8 py-3.5 text-[0.72rem] tracking-[0.18em] uppercase font-medium hover:bg-haus-darkgrey transition shadow-lg shadow-black/10">Shop Collection</button>
+      <button class="bg-transparent text-haus-black border border-haus-border px-8 py-3.5 text-[0.72rem] tracking-[0.18em] uppercase hover:border-haus-black hover:bg-haus-offwhite transition">New Arrivals</button>
+    </div>
+    <div class="flex gap-8 md:gap-10 pt-8 border-t border-haus-border w-full max-w-md">
+      <div><div class="font-serif text-3xl md:text-4xl font-light">16+</div><div class="text-[0.65rem] tracking-widest uppercase text-haus-midgrey mt-1">New Styles</div></div>
+      <div><div class="font-serif text-3xl md:text-4xl font-light">100%</div><div class="text-[0.65rem] tracking-widest uppercase text-haus-midgrey mt-1">Sustainable</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Filter/Content Layout -->
+<div class="flex flex-col md:flex-row min-h-screen">
+  <!-- Mobile Filter Toggle -->
+  <div class="md:hidden p-4 border-b border-haus-border flex justify-between items-center bg-haus-white sticky top-16 z-30">
+    <span class="text-sm font-medium">16 Products</span>
+    <button class="border border-haus-border px-4 py-2 text-xs uppercase tracking-widest bg-haus-offwhite">Filters</button>
+  </div>
+
+  <!-- Sidebar Filters -->
+  <aside class="w-full md:w-64 border-r border-haus-border p-6 md:p-8 hidden md:block sticky top-[68px] h-[calc(100vh-68px)] overflow-y-auto custom-scrollbar bg-haus-white z-20">
+    <div class="text-[0.65rem] tracking-[0.22em] uppercase text-haus-midgrey mb-6 font-medium">Filters</div>
+    
+    <div class="mb-8 pb-6 border-b border-haus-border">
+      <div class="text-[0.65rem] tracking-widest uppercase text-haus-black mb-4 font-semibold">Category</div>
+      <label class="flex items-center gap-3 py-1 cursor-pointer group"><input type="checkbox" class="accent-haus-black w-3.5 h-3.5"><span class="text-[0.82rem] flex-1 flex justify-between group-hover:text-haus-midgrey transition">Women <span class="text-[0.68rem] text-haus-midgrey bg-haus-palegrey px-2 rounded-full">24</span></span></label>
+      <label class="flex items-center gap-3 py-1 cursor-pointer group"><input type="checkbox" class="accent-haus-black w-3.5 h-3.5"><span class="text-[0.82rem] flex-1 flex justify-between group-hover:text-haus-midgrey transition">Men <span class="text-[0.68rem] text-haus-midgrey bg-haus-palegrey px-2 rounded-full">18</span></span></label>
+      <label class="flex items-center gap-3 py-1 cursor-pointer group"><input type="checkbox" class="accent-haus-black w-3.5 h-3.5"><span class="text-[0.82rem] flex-1 flex justify-between group-hover:text-haus-midgrey transition">Accessories <span class="text-[0.68rem] text-haus-midgrey bg-haus-palegrey px-2 rounded-full">9</span></span></label>
+    </div>
+
+    <!-- Color -->
+    <div class="mb-8 pb-6 border-b border-haus-border">
+      <div class="text-[0.65rem] tracking-widest uppercase text-haus-black mb-4 font-semibold">Colour</div>
+      <div class="flex flex-wrap gap-2">
+        <button class="w-6 h-6 rounded-full border border-haus-border bg-haus-black ring-2 ring-offset-1 ring-transparent hover:ring-haus-black transition duration-200" title="Black"></button>
+        <button class="w-6 h-6 rounded-full border border-haus-border bg-white ring-2 ring-offset-1 ring-transparent hover:ring-haus-black transition duration-200" title="White"></button>
+        <button class="w-6 h-6 rounded-full border border-haus-border bg-haus-lightgrey ring-2 ring-offset-1 ring-transparent hover:ring-haus-black transition duration-200" title="Grey"></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Product Grid -->
+  <main class="flex-1">
+    <div class="flex items-center gap-6 border-b border-haus-border overflow-x-auto px-4 md:px-8 no-scrollbar bg-haus-white sticky top-[115px] md:top-[68px] z-20">
+      <button class="py-4 md:py-5 text-[0.7rem] tracking-[0.15em] uppercase border-b-2 border-haus-black text-haus-black font-semibold whitespace-nowrap">All</button>
+      <button class="py-4 md:py-5 text-[0.7rem] tracking-[0.15em] uppercase border-b-2 border-transparent text-haus-midgrey hover:text-haus-black transition whitespace-nowrap">New In</button>
+      <button class="py-4 md:py-5 text-[0.7rem] tracking-[0.15em] uppercase border-b-2 border-transparent text-haus-midgrey hover:text-haus-black transition whitespace-nowrap">Women</button>
+      <button class="py-4 md:py-5 text-[0.7rem] tracking-[0.15em] uppercase border-b-2 border-transparent text-haus-midgrey hover:text-haus-black transition whitespace-nowrap">Men</button>
+    </div>
+
+    <div class="p-4 flex flex-wrap justify-between items-center border-b border-haus-border md:px-8">
+      <span class="text-xs text-haus-midgrey">4 Products found</span>
+      <select class="border border-haus-border py-2 px-3 text-[0.75rem] text-haus-black outline-none bg-haus-white hover:border-haus-midgrey transition cursor-pointer">
+        <option>Featured</option>
+        <option>Price: Low to High</option>
+        <option>Price: High to Low</option>
+        <option>Newest</option>
+      </select>
+    </div>
+
+    <!-- Grid Layout -->
+    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <!-- Generated via JS for exact DOM replication -->
+    </div>
+  </main>
+</div>
+
+<script>
+const products = [
+  {id:1, name:'Silk Wrap Dress', brand:'HAUS', price:'3,299', orig:'4,599', emoji:'👗', badge:'Sale', colors:['#0a0a0a','#d4d4d4']},
+  {id:2, name:'Tailored Wool Blazer', brand:'STUDIO', price:'5,499', orig:null, emoji:'🧥', badge:'Bestseller', colors:['#0a0a0a','#1e1e1e']},
+  {id:3, name:'Linen Wide-Leg Trousers', brand:'HAUS', price:'2,199', orig:'2,799', emoji:'👖', badge:'Sale', colors:['#d4d4d4']},
+  {id:4, name:'Cashmere Turtleneck', brand:'LUXE', price:'4,899', orig:null, emoji:'🧶', badge:'New', colors:['#ffffff','#0a0a0a']},
+  {id:5, name:'Structured Mini Bag', brand:'ATELIER', price:'6,299', orig:null, emoji:'👜', badge:'New', colors:['#0a0a0a','#d4d4d4']},
+  {id:6, name:'Oversized Denim Jacket', brand:'RAW', price:'3,799', orig:null, emoji:'🧥', badge:null, colors:['#0a0a0a']}
+];
+
+document.getElementById('productGrid').innerHTML = products.map((p) => `
+<div class="border-b border-r border-haus-border bg-haus-white relative overflow-hidden group hover:shadow-2xl hover:z-10 transition-shadow duration-300 flex flex-col h-full">
+  <div class="aspect-[3/4] bg-haus-offwhite flex items-center justify-center text-6xl md:text-[6rem] relative overflow-hidden border-b border-haus-border pcard-img-hover cursor-pointer group-hover:bg-haus-palegrey transition-colors duration-300">
+    <span class="pcard-emoji transition-transform duration-500 ease-out grayscale-[0.2] block">${p.emoji}</span>
+    ${p.badge ? `<span class="absolute top-4 left-0 text-[0.6rem] tracking-[0.16em] uppercase px-3 py-1 font-semibold ${p.badge==='Sale'?'bg-haus-red text-haus-white':'bg-haus-black text-haus-white'} shadow-sm">${p.badge}</span>` : ''}
+    <button class="absolute top-3 right-3 bg-haus-white border border-haus-border w-8 h-8 flex items-center justify-center text-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-300 hover:text-haus-red rounded-full shadow-sm">♡</button>
+    <button class="absolute bottom-0 left-0 right-0 bg-haus-black text-haus-white py-3 text-center text-[0.65rem] tracking-[0.18em] uppercase translate-y-full group-hover:translate-y-0 transition-transform duration-300 font-medium hover:bg-haus-darkgrey">
+      + Add to Bag
+    </button>
+  </div>
+  <div class="p-5 flex flex-col flex-1 z-10 bg-haus-white">
+    <div class="text-[0.62rem] tracking-[0.18em] uppercase text-haus-midgrey mb-1">${p.brand}</div>
+    <div class="font-serif text-[1.1rem] leading-snug text-haus-black mb-3.5 font-medium">${p.name}</div>
+    <div class="flex gap-1.5 mb-3 mt-auto">
+      ${p.colors.map(c => `<div class="w-3 h-3 rounded-full border border-black/10 shadow-inner" style="background:${c}"></div>`).join('')}
+    </div>
+    <div class="flex items-baseline gap-2">
+      <span class="text-[0.95rem] font-medium text-haus-black">₹${p.price}</span>
+      ${p.orig ? `<span class="text-[0.78rem] text-haus-lightgrey line-through">₹${p.orig}</span><span class="text-[0.68rem] text-haus-red font-semibold ml-1">Sale</span>` : ''}
+    </div>
+  </div>
+</div>
+`).join('');
+
+// Custom Cursor Logic
+const cur = document.getElementById('cur'), curRing = document.getElementById('curRing');
+let mx=0, my=0, rx=0, ry=0;
+document.addEventListener('mousemove', e => { 
+  mx=e.clientX; my=e.clientY; 
+  cur.style.left=mx+'px'; cur.style.top=my+'px'; 
+});
+function anim() { 
+  rx+=(mx-rx)*0.18; ry+=(my-ry)*0.18; 
+  curRing.style.left=rx+'px'; curRing.style.top=ry+'px'; 
+  requestAnimationFrame(anim); 
+}
+anim();
+</script>
+</body>
+</html>

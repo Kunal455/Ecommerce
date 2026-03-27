@@ -10,6 +10,9 @@ const checkoutRoutes = require('./routes/checkoutRoutes')
 const orderRoutes = require("./routes/OrderRoute");
 const uploads = require('./routes/UploadRoutes')
 const subscriberRoutes = require("./routes/subscriberRoutes");
+const adminRoutes = require("./routes/adminRoute");
+const adminProductRoutes = require("./routes/productAdminRoute");
+const adminOrderRoute = require("./routes/adminOrderRouter");
 dotenv.config();
 
 // connect to mongo
@@ -41,9 +44,11 @@ app.use("/api/v3/cart", CartRouter)
 app.use("/api/v3/checkout", checkoutRoutes);
 app.use("/api/v3/order", orderRoutes);
 app.use("/api/v3/upload", uploads)
-
-
 app.use("/api/v3", subscriberRoutes);
+//admin
+app.use("/api/v3/admin/users", adminRoutes);
+app.use("/api/v3/admin/products", adminProductRoutes);
+app.use("/api/v3/admin/orders", adminOrderRoute);
 const PORT = 8000;
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`.bgBlue);
