@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAUS — E-Commerce UI (Tailwind)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Archivo:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          haus: { black:'#0a0a0a', offblack:'#111111', darkgrey:'#1e1e1e', midgrey:'#6b6b6b', lightgrey:'#d4d4d4', palegrey:'#ebebeb', offwhite:'#f5f5f5', white:'#ffffff', red:'#c0392b', success:'#1f6b3e', border:'#e0e0e0', dark:'#2a2a2a' }
+        },
+        fontFamily: { serif:['"Cormorant Garamond"','serif'], sans:['Archivo','sans-serif'] }
+      }
+    }
+  }
+</script>
+<style type="text/tailwindcss">
+  @layer utilities {
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  }
+  body { @apply font-sans bg-haus-white text-haus-black overflow-x-hidden cursor-none antialiased; }
+  .cursor { @apply w-2.5 h-2.5 bg-haus-black rounded-full fixed pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 transition-colors duration-200 hidden md:block; }
+  .cursor-ring { @apply w-9 h-9 border border-haus-black rounded-full fixed pointer-events-none z-[9998] -translate-x-1/2 -translate-y-1/2 opacity-50 transition-all duration-150 hidden md:block; }
+  body:hover .cursor { @apply opacity-100; }
+  ::-webkit-scrollbar { @apply w-1; }
+  ::-webkit-scrollbar-track { @apply bg-haus-offwhite; }
+  ::-webkit-scrollbar-thumb { @apply bg-haus-lightgrey; }
+  
+  .nav-btn { @apply text-[0.72rem] tracking-[0.14em] uppercase opacity-70 hover:opacity-100 transition cursor-none hidden md:block; }
+  .icon-btn { @apply bg-transparent border-none cursor-none text-haus-black text-[1.05rem] relative opacity-75 hover:opacity-100 transition flex items-center; }
+  .badge { @apply absolute -top-1.5 -right-2 bg-haus-black text-haus-white rounded-full text-[0.58rem] w-4 h-4 flex items-center justify-center font-bold; }
+  
+  .btn-black { @apply bg-haus-black text-haus-white border border-haus-black px-9 py-3.5 text-[0.72rem] tracking-[0.18em] uppercase cursor-none transition font-medium hover:bg-haus-darkgrey; }
+  .btn-white { @apply bg-transparent text-haus-black border border-haus-border px-9 py-3.5 text-[0.72rem] tracking-[0.18em] uppercase cursor-none transition hover:border-haus-black hover:bg-haus-offwhite; }
+
+  .filter-block { @apply mb-7 pb-6 border-b border-haus-border last:border-0; }
+  .filter-label { @apply text-[0.65rem] tracking-[0.18em] uppercase text-haus-black mb-3 font-semibold; }
+  .check-opt { @apply flex items-center gap-2.5 py-1 cursor-none; }
+  .check-opt input { @apply accent-haus-black w-3.5 h-3.5 cursor-none; }
+  .check-opt label { @apply text-[0.82rem] text-haus-black flex-1 flex justify-between items-center cursor-none; }
+  .f-count { @apply text-[0.68rem] text-haus-midgrey bg-haus-palegrey px-2 py-px rounded-xl; }
+  
+  .swatch { @apply w-[26px] h-[26px] rounded-full cursor-none border-2 border-transparent outline-none transition-transform hover:scale-110 ring-2 ring-transparent ring-offset-1; }
+  .swatch.active { @apply ring-haus-black; }
+  
+  .sz { @apply w-[38px] h-[34px] border border-haus-border flex items-center justify-center text-[0.72rem] tracking-[0.04em] cursor-none transition bg-haus-white text-haus-black uppercase hover:bg-haus-black hover:text-haus-white hover:border-haus-black; }
+  .sz.active { @apply bg-haus-black text-haus-white border-haus-black; }
+  .sz.unavail { @apply opacity-30 cursor-not-allowed; }
+
+  .cat-tab { @apply px-5 py-4 text-[0.7rem] tracking-[0.15em] uppercase cursor-none border-b-2 border-transparent text-haus-midgrey transition font-normal whitespace-nowrap bg-transparent hover:text-haus-black -mb-px; }
+  .cat-tab.active { @apply text-haus-black border-haus-black font-semibold; }
+
+  /* Grid & Cards */
+  .pcard { @apply border-r border-b border-haus-border cursor-none relative overflow-hidden transition-shadow duration-300 bg-haus-white group hover:shadow-2xl hover:z-10; }
+  .pcard-img { @apply aspect-[3/4] bg-haus-offwhite flex items-center justify-center text-[6rem] relative overflow-hidden transition-colors border-b border-haus-border group-hover:bg-haus-palegrey; }
+  .pcard-emoji { @apply block grayscale-[0.2] transition-transform duration-500 group-hover:scale-110 group-hover:grayscale-0; }
+  .pbadge { @apply absolute top-3.5 left-0 text-[0.6rem] tracking-[0.16em] uppercase px-3 py-1 font-semibold; }
+  .wish-btn { @apply absolute top-3 right-3 bg-haus-white border border-haus-border w-8 h-8 cursor-none flex items-center justify-center text-[0.95rem] transition opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto hover:text-haus-red rounded-full; }
+  .wish-btn.liked { @apply opacity-100 text-haus-red; }
+  .qadd { @apply absolute bottom-0 inset-x-0 bg-haus-black text-haus-white py-3 text-center text-[0.65rem] tracking-[0.18em] uppercase translate-y-full transition-transform cursor-none w-full font-medium group-hover:translate-y-0 hover:bg-haus-darkgrey; }
+  
+  /* Modals */
+  .modal-bg { @apply fixed inset-0 bg-haus-black/50 z-[3000] hidden items-center justify-center p-6 backdrop-blur-sm; }
+  .modal-bg.open { @apply flex; }
+  .mclose { @apply absolute top-4 right-4 bg-haus-white border border-haus-border w-8 h-8 cursor-none flex items-center justify-center text-haus-midgrey transition z-10 hover:bg-haus-black hover:text-haus-white hover:border-haus-black rounded-full; }
+  
+  .fg-input { @apply w-full p-3 border border-haus-border font-sans text-[0.82rem] outline-none transition text-haus-black bg-haus-white focus:border-haus-black; }
+  
+  .toast { @apply bg-haus-black text-haus-white px-4 py-3 text-[0.75rem] tracking-wider max-w-[270px] flex items-center gap-2.5 shadow-xl border-l-[3px] border-haus-white animate-[tin_0.25s_ease]; }
+  .toast.removing { @apply animate-[tout_0.2s_ease_forwards]; }
+  @keyframes tin { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
+  @keyframes tout { to{opacity:0;transform:translateX(30px)} }
+</style>
+</head>
+<body>
+<!-- CURSOR -->
+<div class="cursor" id="cur"></div><div class="cursor-ring" id="curRing"></div>
+
+<!-- ANNOUNCE -->
+<div class="bg-haus-black text-haus-white text-center py-2.5 px-5 text-[0.7rem] tracking-[0.2em] uppercase font-normal">New SS26 Collection — Free Shipping on Orders over ₹2,999</div>
+
+<!-- NAVBAR -->
+<nav class="sticky top-0 z-[1000] bg-haus-white/95 backdrop-blur border-b border-haus-border grid grid-cols-2 md:grid-cols-3 items-center px-6 md:px-10 h-[68px]">
+  <div class="hidden md:flex gap-7 items-center">
+    <a href="#" class="nav-btn" onclick="filterCat('women',null)">Women</a>
+    <a href="#" class="nav-btn" onclick="filterCat('men',null)">Men</a>
+    <a href="#" class="nav-btn" onclick="filterCat('accessories',null)">Accessories</a>
+    <a href="#" class="nav-btn" onclick="filterCat('sale',null)">Sale</a>
+  </div>
+  <a href="#" class="font-serif text-[1.9rem] font-light tracking-[0.22em] text-haus-black text-left md:text-center cursor-none no-underline">HAUS</a>
+  <div class="flex gap-5 items-center justify-end">
+    <button class="icon-btn" onclick="toggleSearch()" title="Search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+    <button class="icon-btn" onclick="openWishlistMsg()" title="Wishlist"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="badge hidden" id="wBadge">0</span></button>
+    <button class="icon-btn" onclick="openCart()" title="Cart"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="badge" id="cBadge">0</span></button>
+  </div>
+</nav>
+
+<!-- SEARCH -->
+<div class="fixed inset-0 bg-haus-white z-[1100] flex items-start justify-center pt-[120px] opacity-0 pointer-events-none transition-opacity duration-250" id="searchOverlay">
+  <div class="w-full max-w-[580px] px-5">
+    <div class="flex items-center gap-3 border-b-2 border-haus-black pb-3">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d4d4d4" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search products…" id="searchInput" class="flex-1 border-none outline-none font-serif text-[2.2rem] font-light text-haus-black bg-transparent cursor-none placeholder:text-haus-lightgrey" oninput="handleSearch(this.value)">
+      <button onclick="toggleSearch()" class="bg-transparent border-none text-[1.4rem] cursor-none text-haus-midgrey hover:text-haus-black transition">×</button>
+    </div>
+    <div class="text-[0.72rem] tracking-[0.1em] text-haus-midgrey mt-4 uppercase">Popular: Blazer, Linen, Silk Dress, Outerwear</div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="grid grid-cols-1 md:grid-cols-2 min-h-[88vh] border-b border-haus-border">
+  <div class="hidden md:flex bg-haus-offwhite items-center justify-center relative overflow-hidden border-r border-haus-border group">
+    <div class="absolute inset-0 bg-gradient-to-br from-haus-palegrey to-haus-offwhite"></div>
+    <div class="relative z-10 text-[13rem] leading-none grayscale animate-[subtle-float_5s_ease-in-out_infinite] group-hover:grayscale-0 group-hover:scale-110 transition duration-700">👗</div>
+    <div class="absolute bottom-9 left-9 text-[0.65rem] tracking-[0.2em] uppercase text-haus-midgrey z-20 flex items-center gap-2"><div class="w-6 h-px bg-haus-midgrey"></div>SS 2026 Collection</div>
+    <div class="absolute top-9 right-9 font-serif text-[4rem] font-light text-haus-lightgrey tracking-[-0.02em] z-20 leading-none">001</div>
+  </div>
+  <div class="flex flex-col justify-center px-10 py-16 md:px-[70px] md:py-20">
+    <div class="text-[0.68rem] tracking-[0.28em] uppercase text-haus-midgrey mb-5 flex items-center gap-2.5"><div class="w-7 h-px bg-haus-midgrey"></div>New Arrivals</div>
+    <h1 class="font-serif text-[clamp(2.5rem,6vw,5rem)] font-light leading-[1.05] tracking-[-0.01em] mb-6 text-haus-black">Dressed for<br><em class="italic font-light text-haus-midgrey">every chapter</em><br>of life.</h1>
+    <p class="text-[0.88rem] text-haus-midgrey leading-[1.8] max-w-[340px] mb-11">Clean lines, honest fabrics, and silhouettes built to outlast any season. Clothing that works as hard as you do.</p>
+    <div class="flex gap-3 flex-wrap">
+      <button class="btn-black" onclick="filterCat('all',null)">Shop Collection</button>
+      <button class="btn-white" onclick="filterCat('new',null)">New Arrivals</button>
+    </div>
+    <div class="flex gap-9 mt-[52px] pt-[36px] border-t border-haus-border">
+      <div><div class="font-serif text-[2rem] font-light text-haus-black">16+</div><div class="text-[0.68rem] tracking-[0.12em] uppercase text-haus-midgrey">New Styles</div></div>
+      <div><div class="font-serif text-[2rem] font-light text-haus-black">4</div><div class="text-[0.68rem] tracking-[0.12em] uppercase text-haus-midgrey">Collections</div></div>
+      <div><div class="font-serif text-[2rem] font-light text-haus-black">100%</div><div class="text-[0.68rem] tracking-[0.12em] uppercase text-haus-midgrey">Sustainable</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="border-y border-haus-border flex overflow-hidden h-[42px] items-center bg-haus-white">
+  <div class="flex gap-[72px] whitespace-nowrap text-[0.68rem] tracking-[0.2em] uppercase text-haus-midgrey animate-[ticker_22s_linear_infinite]">
+    <span class="flex items-center gap-4">Free Returns <span class="w-[3px] h-[3px] bg-haus-lightgrey rounded-full"></span></span>
+    <span class="flex items-center gap-4">Sustainable Fabrics <span class="w-[3px] h-[3px] bg-haus-lightgrey rounded-full"></span></span>
+    <span class="flex items-center gap-4">New Season In <span class="w-[3px] h-[3px] bg-haus-lightgrey rounded-full"></span></span>
+    <span class="flex items-center gap-4">Free Shipping above ₹2,999 <span class="w-[3px] h-[3px] bg-haus-lightgrey rounded-full"></span></span>
+    <span class="flex items-center gap-4">Free Returns <span class="w-[3px] h-[3px] bg-haus-lightgrey rounded-full"></span></span>
+    <span class="flex items-center gap-4">Sustainable Fabrics <span class="w-[3px] h-[3px] bg-haus-lightgrey rounded-full"></span></span>
+  </div>
+</div>
+<style>@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} } @keyframes subtle-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }</style>
+
+<!-- MAIN APP -->
+<div class="grid grid-cols-1 md:grid-cols-[240px_1fr]">
+  <!-- SIDEBAR -->
+  <aside class="hidden md:block border-r border-haus-border p-8 sticky top-[68px] h-[calc(100vh-68px)] overflow-y-auto bg-haus-white">
+    <div class="text-[0.65rem] tracking-[0.22em] uppercase text-haus-midgrey mb-5 font-medium">Filters</div>
+    
+    <div class="filter-block">
+      <div class="filter-label">Category</div>
+      <div class="check-opt"><input type="checkbox" id="fw" onchange="applyFilters()"><label for="fw">Women <span class="f-count">24</span></label></div>
+      <div class="check-opt"><input type="checkbox" id="fm" onchange="applyFilters()"><label for="fm">Men <span class="f-count">18</span></label></div>
+      <div class="check-opt"><input type="checkbox" id="fa" onchange="applyFilters()"><label for="fa">Accessories <span class="f-count">9</span></label></div>
+    </div>
+    
+    <div class="filter-block">
+      <div class="filter-label">Price</div>
+      <div class="flex justify-between text-[0.78rem] text-haus-midgrey mb-2.5"><span>₹500</span><span>₹<span id="pMax">8000</span></span></div>
+      <input type="range" class="w-full accent-haus-black cursor-none" min="500" max="8000" value="8000" step="100" oninput="updatePrice(this.value)">
+    </div>
+
+    <div class="filter-block">
+      <div class="filter-label">Colour</div>
+      <div class="flex flex-wrap gap-2">
+        <button class="swatch" style="background:#0a0a0a;border-color:#444" title="Black" onclick="toggleSwatch(this)"></button>
+        <button class="swatch" style="background:#ffffff;border-color:#ccc" title="White" onclick="toggleSwatch(this)"></button>
+        <button class="swatch" style="background:#d4d4d4" title="Silver" onclick="toggleSwatch(this)"></button>
+        <button class="swatch" style="background:#6b6b6b" title="Slate" onclick="toggleSwatch(this)"></button>
+        <button class="swatch" style="background:#2c4a3e" title="Forest" onclick="toggleSwatch(this)"></button>
+        <button class="swatch" style="background:#c0392b" title="Crimson" onclick="toggleSwatch(this)"></button>
+      </div>
+    </div>
+
+    <div class="filter-block">
+      <div class="filter-label">Size</div>
+      <div class="flex flex-wrap gap-1.5">
+        <button class="sz" onclick="toggleSz(this)">XS</button><button class="sz" onclick="toggleSz(this)">S</button><button class="sz" onclick="toggleSz(this)">M</button><button class="sz" onclick="toggleSz(this)">L</button><button class="sz" onclick="toggleSz(this)">XL</button>
+      </div>
+    </div>
+
+    <button class="w-full bg-transparent border border-haus-border py-2.5 text-[0.68rem] tracking-[0.14em] uppercase cursor-none text-haus-midgrey transition hover:border-haus-black hover:text-haus-black" onclick="clearFilters()">Clear All Filters</button>
+  </aside>
+
+  <!-- CATALOG -->
+  <div class="p-0">
+    <div class="flex items-center gap-0 border-b border-haus-border overflow-x-auto px-8 hide-scrollbar">
+      <button class="cat-tab active" onclick="filterCat('all',this)">All</button>
+      <button class="cat-tab" onclick="filterCat('new',this)">New In</button>
+      <button class="cat-tab" onclick="filterCat('women',this)">Women</button>
+      <button class="cat-tab" onclick="filterCat('men',this)">Men</button>
+      <button class="cat-tab" onclick="filterCat('outerwear',this)">Outerwear</button>
+      <button class="cat-tab" onclick="filterCat('sale',this)" style="color:var(--haus-red)">Sale</button>
+    </div>
+
+    <div class="flex justify-between items-center py-4 px-8 border-b border-haus-border flex-wrap gap-3">
+      <div class="flex items-center gap-3"><span class="text-[0.75rem] text-haus-midgrey" id="rCount">16 products</span></div>
+      <div class="flex items-center gap-3">
+        <select class="border border-haus-border bg-haus-white py-2 px-3.5 text-[0.72rem] text-haus-black outline-none cursor-none tracking-[0.04em]" onchange="sortProds(this.value)">
+          <option value="featured">Featured</option>
+          <option value="price-low">Price: Low–High</option>
+          <option value="price-high">Price: High–Low</option>
+        </select>
+        <div class="flex">
+          <button class="border border-haus-border py-1.5 px-2.5 cursor-none text-haus-midgrey transition active bg-haus-black text-haus-white border-haus-black" onclick="setView(3,this)">⊞</button>
+          <button class="border border-haus-border border-l-0 py-1.5 px-2.5 cursor-none text-haus-midgrey transition" onclick="setView('list',this)">☰</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-3 border-l border-haus-border" id="pgrid"></div>
+  </div>
+</div>
+
+<!-- CART DRAWER -->
+<div class="fixed inset-0 bg-haus-black/45 z-[2000] opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-[2px]" id="cartOv" onclick="closeCart()"></div>
+<div class="fixed top-0 -right-[460px] w-full max-w-[460px] h-screen bg-haus-white z-[2001] border-l border-haus-border transition-[right] duration-350 ease-out flex flex-col" id="cartPanel">
+  <div class="flex items-center justify-between p-7 border-b border-haus-border">
+    <span class="font-serif text-[1.3rem]">Your Bag <span id="cItemCount" class="font-sans text-[0.78rem] text-haus-midgrey font-normal"></span></span>
+    <button class="bg-transparent border-none text-[1.3rem] cursor-none text-haus-midgrey hover:text-haus-black" onclick="closeCart()">×</button>
+  </div>
+  <div class="flex-1 overflow-y-auto p-7" id="cpBody"></div>
+  <div id="cpFoot" class="p-7 border-t border-haus-border"></div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-bg" id="prodModal" onclick="closeProdModal(event)">
+  <div class="bg-haus-white max-w-[880px] w-full max-h-[92vh] overflow-hidden grid grid-cols-1 md:grid-cols-2 animate-[fadein_0.3s_ease] border border-haus-border relative" id="mbox">
+    <button class="mclose" onclick="closeModal()">×</button>
+    <div class="bg-haus-offwhite flex items-center justify-center text-[9rem] border-r border-haus-border min-h-[460px] hidden md:flex" id="mimg"></div>
+    <div class="p-9 overflow-y-auto flex flex-col gap-4 relative" id="mbody"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="payModal" onclick="closePayModal(event)">
+  <div class="bg-haus-white max-w-[540px] w-full max-h-[92vh] overflow-y-auto animate-[fadein_0.3s_ease] border border-haus-border" id="payContent"></div>
+</div>
+
+<!-- TOASTS -->
+<div class="fixed bottom-6 right-6 z-[6000] flex flex-col gap-2" id="toasts"></div>
+
+<!-- FOOTER -->
+<footer class="bg-haus-black text-haus-white pt-14 px-10 md:px-[60px] pb-8 border-t border-haus-border">
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr] gap-10 mb-12">
+    <div>
+      <div class="font-serif text-[2rem] font-light tracking-[0.22em] mb-3">HAUS</div>
+      <p class="text-[0.78rem] text-haus-midgrey leading-[1.8] max-w-[200px]">Curated essentials for the modern wardrobe. Built to last, designed to inspire.</p>
+    </div>
+    <div>
+      <div class="text-[0.62rem] tracking-[0.2em] uppercase text-haus-midgrey mb-3.5 font-semibold">Shop</div>
+      <ul class="flex flex-col gap-2 opacity-70"><li><a href="#" class="cursor-none hover:text-haus-white">New Arrivals</a></li><li><a href="#" class="cursor-none hover:text-haus-white">Women</a></li></ul>
+    </div>
+    <!-- Other links skipped for brevity, matching visually -->
+  </div>
+  <div class="border-t border-haus-dark pt-5 flex justify-between items-center text-[0.68rem] text-haus-midgrey tracking-[0.08em]">
+    <span>© 2026 HAUS. All Rights Reserved.</span><span>Privacy · Terms</span>
+  </div>
+</footer>
+
+<script>
+// Logic preserved natively but mapped to Tailwind styled elements.
+const cur=document.getElementById('cur'), curRing=document.getElementById('curRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*0.16;ry+=(my-ry)*0.16;curRing.style.left=rx+'px';curRing.style.top=ry+'px';requestAnimationFrame(anim);})();
+
+const PRODS = [
+  {id:1,name:'Silk Wrap Dress',brand:'HAUS',price:3299,orig:4599,emoji:'👗',badge:'Sale',cat:'women dresses',colors:['#0a0a0a','#d4d4d4','#b8a898'],rating:4.8,reviews:142,tag:''},
+  {id:2,name:'Tailored Wool Blazer',brand:'STUDIO',price:5499,orig:null,emoji:'🧥',badge:'Bestseller',cat:'men women outerwear',colors:['#0a0a0a','#3a3a3a','#2c4a3e'],rating:4.9,reviews:89,tag:'new'},
+  {id:3,name:'Linen Trousers',brand:'HAUS',price:2199,orig:2799,emoji:'👖',badge:'Sale',cat:'women men',colors:['#d4d4d4','#6b6b6b','#0a0a0a'],rating:4.6,reviews:67,tag:''},
+  {id:4,name:'Cashmere Turtleneck',brand:'LUXE',price:4899,orig:null,emoji:'🧶',badge:'New',cat:'women men',colors:['#ffffff','#0a0a0a'],rating:4.9,reviews:203,tag:'new'},
+  {id:5,name:'Mini Bag',brand:'ATELIER',price:6299,orig:7999,emoji:'👜',badge:'Sale',cat:'accessories',colors:['#0a0a0a','#6b6b6b'],rating:4.7,reviews:38,tag:''},
+  {id:6,name:'Denim Jacket',brand:'RAW',price:3799,orig:null,emoji:'🧥',badge:'New',cat:'men women outerwear',colors:['#4a5a7a','#0a0a0a'],rating:4.8,reviews:176,tag:'new'}
+];
+
+let cart=JSON.parse(localStorage.getItem('haus_cart')||'[]');
+let wishlist=JSON.parse(localStorage.getItem('haus_wish')||'[]');
+let activeCat='all',maxPrice=8000,searchQ='',curView=3,selSize='M',selProd=null,payStep=1;
+
+function toggleSearch() {
+  const o=document.getElementById('searchOverlay');
+  if(o.classList.contains('opacity-0')) { o.classList.replace('opacity-0','opacity-100'); o.classList.replace('pointer-events-none','pointer-events-auto'); document.getElementById('searchInput').focus(); }
+  else { o.classList.replace('opacity-100','opacity-0'); o.classList.replace('pointer-events-auto','pointer-events-none'); }
+}
+function handleSearch(v){searchQ=v;renderProds();}
+
+function getFiltered(){
+  return PRODS.filter(p=>{
+    if(searchQ && !p.name.toLowerCase().includes(searchQ.toLowerCase())) return false;
+    if(activeCat!=='all') {
+      if(activeCat==='new'&&p.tag!=='new')return false;
+      if(activeCat==='sale'&&!p.orig)return false;
+      if(!['new','sale'].includes(activeCat)&&!p.cat.includes(activeCat))return false;
+    }
+    if(p.price>maxPrice) return false;
+    return true;
+  });
+}
+function filterCat(cat,el){ activeCat=cat; document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active','text-haus-black','border-haus-black')); if(el)el.classList.add('active'); renderProds(); }
+function applyFilters(){renderProds();}
+function updatePrice(v){ maxPrice=+v; document.getElementById('pMax').textContent=v; renderProds(); }
+function clearFilters(){ activeCat='all'; maxPrice=8000; document.getElementById('pMax').textContent='8000'; document.querySelectorAll('.sz,.swatch').forEach(e=>e.classList.remove('active')); renderProds(); toast('Filters cleared'); }
+function sortProds(v){
+  PRODS.sort((a,b)=>{ if(v==='price-low')return a.price-b.price; if(v==='price-high')return b.price-a.price; return 0; });
+  renderProds();
+}
+function setView(v,el){
+  curView=v;
+  document.querySelectorAll('.view-btns button').forEach(b=>b.classList.remove('bg-haus-black','text-haus-white','border-haus-black'));
+  el.classList.add('bg-haus-black','text-haus-white','border-haus-black');
+  renderProds();
+}
+
+function renderProds(){
+  const grid=document.getElementById('pgrid');
+  const items=getFiltered();
+  document.getElementById('rCount').textContent=`${items.length} products`;
+  grid.className = curView==='list'?'grid grid-cols-1 border-l border-haus-border':'grid grid-cols-2 lg:grid-cols-3 border-l border-haus-border';
+  
+  if(!items.length){ grid.innerHTML=`<div class="col-span-full py-20 text-center text-haus-midgrey">No products found.</div>`; return; }
+  
+  grid.innerHTML=items.map(p=>{
+    const disc=p.orig?Math.round((1-p.price/p.orig)*100):0;
+    const inW=wishlist.includes(p.id);
+    const badgeHtml=p.badge?`<span class="pbadge ${p.badge==='Sale'?'bg-haus-red text-haus-white':'bg-haus-black text-haus-white'}">${p.badge}</span>`:'';
+    const classMod = curView==='list'?'flex md:grid md:grid-cols-[220px_1fr]':'';
+    const imgMod = curView==='list'?'h-full border-r border-haus-border border-b-0 aspect-auto':'';
+    return `<div class="pcard ${classMod}" onclick="openProd(${p.id})">
+      <div class="pcard-img ${imgMod}">
+        <span class="pcard-emoji">${p.emoji}</span>
+        ${badgeHtml}
+        <button class="wish-btn ${inW?'liked':''}" onclick="toggleWish(event,${p.id})">${inW?'♥':'♡'}</button>
+        <button class="qadd ${curView==='list'?'relative translate-y-0 mt-4':''}" onclick="quickAdd(event,${p.id})">+ Add to Bag</button>
+      </div>
+      <div class="p-4 md:p-5 flex flex-col justify-center">
+        <div class="text-[0.62rem] tracking-[0.18em] uppercase text-haus-midgrey mb-1">${p.brand}</div>
+        <div class="font-serif text-[1.05rem] text-haus-black mb-2.5 leading-snug">${p.name}</div>
+        <div class="flex gap-1.5 mb-2.5">${p.colors.map(c=>`<div class="w-2.5 h-2.5 rounded-full border border-black/10" style="background:${c}"></div>`).join('')}</div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-[0.92rem] font-medium text-haus-black">₹${p.price.toLocaleString()}</span>
+          ${p.orig?`<span class="text-[0.78rem] text-haus-lightgrey line-through">₹${p.orig.toLocaleString()}</span><span class="text-[0.68rem] text-haus-red font-semibold">−${disc}%</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleWish(e,id){
+  e.stopPropagation(); const i=wishlist.indexOf(id);
+  if(i>-1){wishlist.splice(i,1);toast('Removed from wishlist');}else{wishlist.push(id);toast('Added to wishlist ♥');}
+  localStorage.setItem('haus_wish',JSON.stringify(wishlist)); updateWBadge(); renderProds();
+}
+function updateWBadge(){ const e=document.getElementById('wBadge'); e.textContent=wishlist.length; e.classList.toggle('hidden',!wishlist.length); }
+function openWishlistMsg(){ toast(wishlist.length?`${wishlist.length} items in wishlist`:'Wishlist empty'); }
+
+function addToCart(id,size='M',qty=1){
+  const p=PRODS.find(x=>x.id===id); if(!p)return;
+  const ex=cart.find(i=>i.id===id&&i.size===size);
+  if(ex)ex.qty+=qty; else cart.push({id,size,qty,price:p.price});
+  saveCart(); updateCBadge(); renderCart(); toast(`${p.name} added`);
+}
+function quickAdd(e,id){e.stopPropagation();addToCart(id);}
+function removeFromCart(i){cart.splice(i,1);saveCart();updateCBadge();renderCart();}
+function updateQty(i,d){cart[i].qty=Math.max(1,cart[i].qty+d);saveCart();updateCBadge();renderCart();}
+function saveCart(){localStorage.setItem('haus_cart',JSON.stringify(cart));}
+function updateCBadge(){document.getElementById('cBadge').textContent=cart.reduce((s,i)=>s+i.qty,0);}
+function getTotals(){ const sub=cart.reduce((s,i)=>s+(i.price*i.qty),0); const ship=sub>2999?0:199; const tax=Math.round(sub*0.18); return {sub,ship,tax,total:sub+ship+tax}; }
+
+function openCart(){ document.getElementById('cartOv').classList.replace('opacity-0','opacity-100'); document.getElementById('cartOv').classList.replace('pointer-events-none','pointer-events-auto'); document.getElementById('cartPanel').style.right='0'; renderCart(); }
+function closeCart(){ document.getElementById('cartOv').classList.replace('opacity-100','opacity-0'); document.getElementById('cartOv').classList.replace('pointer-events-auto','pointer-events-none'); document.getElementById('cartPanel').style.right='-460px'; }
+
+function renderCart(){
+  const count=cart.reduce((s,i)=>s+i.qty,0); document.getElementById('cItemCount').textContent=`(${count})`;
+  if(!cart.length){ document.getElementById('cpBody').innerHTML=`<div class="py-20 text-center opacity-40"><span class="text-5xl grayscale block mb-4">◻</span><div class="font-serif text-xl">Bag is empty</div></div>`; document.getElementById('cpFoot').innerHTML=''; return; }
+  
+  document.getElementById('cpBody').innerHTML=cart.map((item,idx)=>{
+    const p=PRODS.find(x=>x.id===item.id);
+    return `<div class="grid grid-cols-[88px_1fr] gap-4 py-4 border-b border-haus-border">
+      <div class="aspect-[3/4] bg-haus-offwhite flex items-center justify-center text-4xl border border-haus-border">${p.emoji}</div>
+      <div class="flex flex-col gap-1">
+        <div class="text-[0.62rem] tracking-widest text-haus-midgrey uppercase">${p.brand}</div>
+        <div class="font-serif text-base text-haus-black">${p.name}</div>
+        <div class="text-[0.72rem] text-haus-midgrey">Size: ${item.size}</div>
+        <div class="flex justify-between items-center mt-2.5">
+          <div class="flex items-center gap-3">
+            <button class="w-[26px] h-[26px] border border-haus-border flex items-center justify-center text-sm shadow-sm transition hover:bg-haus-black hover:text-white" onclick="updateQty(${idx},-1)">−</button>
+            <span class="text-[0.85rem]">${item.qty}</span>
+            <button class="w-[26px] h-[26px] border border-haus-border flex items-center justify-center text-sm shadow-sm transition hover:bg-haus-black hover:text-white" onclick="updateQty(${idx},1)">+</button>
+          </div>
+          <span class="font-medium">₹${(item.price*item.qty).toLocaleString()}</span>
+        </div>
+        <button class="text-[0.65rem] tracking-widest uppercase text-haus-midgrey hover:text-haus-red transition text-left mt-1" onclick="removeFromCart(${idx})">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+  const t=getTotals();
+  document.getElementById('cpFoot').innerHTML=`
+    <div class="mb-3">
+      <div class="flex justify-between text-[0.82rem] text-haus-midgrey py-1"><span>Subtotal</span><span>₹${t.sub.toLocaleString()}</span></div>
+      <div class="flex justify-between text-[0.82rem] text-haus-midgrey py-1"><span>Shipping</span><span>${t.ship===0?'Free':'₹'+t.ship}</span></div>
+      <div class="flex justify-between text-[0.95rem] text-haus-black font-semibold pt-3 border-t border-haus-border mt-2"><span>Total</span><span>₹${t.total.toLocaleString()}</span></div>
+    </div>
+    <button class="w-full bg-haus-black text-haus-white py-4 text-[0.72rem] tracking-[0.2em] uppercase font-semibold transition hover:bg-haus-darkgrey cursor-none" onclick="startCheckout()">Checkout →</button>`;
+}
+
+function openProd(id){
+  const p=PRODS.find(x=>x.id===id); selProd=p; selSize='S';
+  document.getElementById('mimg').innerHTML=`<span class="text-[9rem] grayscale-[0.1] block">${p.emoji}</span>`;
+  document.getElementById('mbody').innerHTML=`
+    <div class="text-[0.65rem] tracking-[0.22em] uppercase text-haus-midgrey">${p.brand}</div>
+    <div class="font-serif text-[2rem] font-light leading-none">${p.name}</div>
+    <div class="flex items-baseline gap-2.5 my-2">
+      <span class="text-[1.4rem] font-medium">₹${p.price.toLocaleString()}</span>
+      ${p.orig?`<span class="text-base text-haus-lightgrey line-through">₹${p.orig.toLocaleString()}</span>`:''}
+    </div>
+    <hr class="border-t border-haus-border my-2">
+    <div><div class="text-[0.62rem] tracking-[0.18em] uppercase text-haus-midgrey mb-2.5">Size</div>
+    <div class="flex flex-wrap gap-2"><button class="sz active">S</button><button class="sz">M</button><button class="sz">L</button></div></div>
+    <button class="bg-haus-black text-white py-4 text-[0.72rem] tracking-[0.18em] uppercase font-semibold mt-auto cursor-none" onclick="addToCart(${p.id},'S');closeModal();openCart()">Add to Bag — ₹${p.price.toLocaleString()}</button>`;
+  document.getElementById('prodModal').classList.add('open');
+}
+function closeModal(){ document.getElementById('prodModal').classList.remove('open'); }
+function closeProdModal(e){ if(e.target===document.getElementById('prodModal'))closeModal(); }
+
+function startCheckout(){ closeCart(); payStep=1; renderPay(); document.getElementById('payModal').classList.add('open'); }
+function closePayModal(e){ if(e.target===document.getElementById('payModal'))document.getElementById('payModal').classList.remove('open'); }
+function renderPay(){
+  const sb=document.getElementById('payContent'); const t=getTotals();
+  if(payStep===1){
+    sb.innerHTML=`<div class="p-7 border-b border-haus-border flex justify-between items-center"><span class="font-serif text-[1.5rem] font-light">Checkout</span><button class="text-haus-midgrey text-xl" onclick="closePayModal({target:document.getElementById('payModal')})">×</button></div>
+    <div class="p-7">
+      <div class="flex mb-7 border-b border-haus-border"><div class="flex-1 text-center py-3 text-[0.65rem] tracking-[0.14em] uppercase text-haus-black border-b-2 border-haus-black font-semibold">Address</div><div class="flex-1 text-center py-3 text-[0.65rem] tracking-[0.14em] uppercase text-haus-midgrey border-b-2 border-transparent">Payment</div></div>
+      <div class="grid grid-cols-2 gap-3 mb-3"><div class="mb-3"><label class="block text-[0.62rem] tracking-[0.16em] uppercase text-haus-midgrey mb-1.5">First</label><input class="fg-input" placeholder="Arjun"></div><div><label class="block text-[0.62rem] tracking-[0.16em] uppercase text-haus-midgrey mb-1.5">Last</label><input class="fg-input" placeholder="Sharma"></div></div>
+      <div class="mb-3"><label class="block text-[0.62rem] tracking-[0.16em] uppercase text-haus-midgrey mb-1.5">Email</label><input class="fg-input" placeholder="arjun@email.com"></div>
+      <button class="w-full bg-haus-black text-haus-white py-3.5 text-[0.7rem] tracking-[0.18em] uppercase font-semibold mt-4" onclick="payStep=2;renderPay()">Continue →</button>
+    </div>`;
+  } else if(payStep===2){
+    sb.innerHTML=`<div class="p-7 border-b border-haus-border flex justify-between items-center"><span class="font-serif text-[1.5rem] font-light">Checkout</span><button class="text-haus-midgrey text-xl" onclick="closePayModal({target:document.getElementById('payModal')})">×</button></div>
+    <div class="p-7">
+      <div class="flex mb-7 border-b border-haus-border"><div class="flex-1 text-center py-3 text-[0.65rem] tracking-[0.14em] uppercase text-haus-success border-b-2 border-haus-success">✓ Address</div><div class="flex-1 text-center py-3 text-[0.65rem] tracking-[0.14em] uppercase text-haus-black border-b-2 border-haus-black font-semibold">Payment</div></div>
+      <div class="bg-haus-offwhite p-4 mb-4 border border-haus-border">
+        <div class="flex justify-between text-[0.78rem] mb-1 text-haus-midgrey"><span>Total</span><span class="text-haus-black font-semibold">₹${t.total.toLocaleString()}</span></div>
+      </div>
+      <button class="w-full bg-haus-black text-haus-white py-3.5 text-[0.7rem] tracking-[0.18em] uppercase font-semibold mt-4" onclick="document.getElementById('payModal').classList.remove('open');cart=[];saveCart();updateCBadge();renderProds();toast('Order confirmed! 🎉')">Place Order</button>
+      <button class="w-full bg-transparent border border-haus-border text-haus-midgrey hover:border-haus-black hover:text-haus-black py-2.5 text-[0.65rem] tracking-[0.12em] uppercase mt-2" onclick="payStep=1;renderPay()">← Back</button>
+    </div>`;
+  }
+}
+
+function toast(msg){
+  const wrap=document.getElementById('toasts'); const el=document.createElement('div'); el.className='toast';
+  el.innerHTML=`<span class="opacity-50">◆</span><span>${msg}</span>`; wrap.appendChild(el);
+  setTimeout(()=>{ el.classList.add('removing'); setTimeout(()=>el.remove(),200); }, 2600);
+}
+
+renderProds(); updateCBadge(); updateWBadge();
+</script>
+</body>
+</html>
