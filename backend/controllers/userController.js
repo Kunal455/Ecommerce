@@ -1,15 +1,15 @@
 // backend/controllers/userController.js
-const User = require("../models/User");
+const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const sendToken = require("../utils/sendToken");
 
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     // Validation
-    if (!name || !email || !password) {
+    if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -26,7 +26,8 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     user = await User.create({
-      name,
+      firstName,
+      lastName,
       email,
       password: hashedPassword
     });
