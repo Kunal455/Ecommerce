@@ -3,6 +3,8 @@ const generateToken = require("./generateToken");
 const sendToken = (user, res, statusCode) => {
   const token = generateToken(user._id);
 
+  console.log(token)
+
   // set cookie (secure way)
   res.cookie("token", token, {
     httpOnly: true,

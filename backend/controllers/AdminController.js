@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const User = require("../models/user");
 
 // @route   GET /api/admin/users
 // @desc    Get all users (Admin only)
@@ -14,7 +14,7 @@ const getAllUsers = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { firstName, lastName, email, password, role } = req.body;
 
   try {
     // check if user exists
@@ -28,7 +28,8 @@ const createUser = async (req, res) => {
 
     // create new user
     user = await User.create({
-      name,
+      firstName,
+      lastName,
       email,
       password,
       role,
@@ -57,7 +58,8 @@ const updateUser = async (req, res) => {
     }
 
     // update fields
-    user.name = req.body.name || user.name;
+    user.firstName = req.body.firstName || user.firstName;
+    user.lastName = req.body.lastName || user.lastName;
     user.email = req.body.email || user.email;
     user.role = req.body.role || user.role;
 
