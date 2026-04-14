@@ -1,5 +1,5 @@
 const Product = require("../models/Product");
-
+const redisClient = require('../config/redis');
 
 const createProduct = async (req, res) => {
   try {
@@ -65,6 +65,18 @@ const createProduct = async (req, res) => {
 
     const createdProduct = await product.save();
 
+    // Clear the cache since a new product was added
+      try {
+  await redisClient.del(
+    'products',
+    'products:best-sellers',
+    'products:new-arrivals',
+    'similar-products'
+  );
+} catch (err) {
+  console.error("Redis error:", err);
+}
+
     res.status(201).json(createdProduct);
 
   } catch (error) {
@@ -79,20 +91,20 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Check if product exists
     const product = await Product.findById(id);
-    
+
     if (!product) {
-      return res.status(404).json({ 
-        message: "Product not found" 
+      return res.status(404).json({
+        message: "Product not found"
       });
     }
 
     // Check if user is admin or product owner
     if (product.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-      return res.status(403).json({ 
-        message: "Not authorized to update this product" 
+      return res.status(403).json({
+        message: "Not authorized to update this product"
       });
     }
 
@@ -122,8 +134,8 @@ const updateProduct = async (req, res) => {
     if (sku && sku !== product.sku) {
       const existingSku = await Product.findOne({ sku, _id: { $ne: id } });
       if (existingSku) {
-        return res.status(400).json({ 
-          message: "SKU already exists" 
+        return res.status(400).json({
+          message: "SKU already exists"
         });
       }
     }
@@ -151,6 +163,18 @@ const updateProduct = async (req, res) => {
 
     const updatedProduct = await product.save();
 
+    // Clear the cache since a product was updated
+    try {
+  await redisClient.del(
+    'products',
+    'products:best-sellers',
+    'products:new-arrivals',
+    'similar-products'
+  );
+} catch (err) {
+  console.error("Redis error:", err);
+}
+
     res.status(200).json({
       message: "Product updated successfully",
       product: updatedProduct
@@ -158,9 +182,9 @@ const updateProduct = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ 
-      message: "Server Error", 
-      error: error.message 
+    res.status(500).json({
+      message: "Server Error",
+      error: error.message
     });
   }
 };
@@ -171,27 +195,42 @@ const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    
+
     const product = await Product.findById(id);
 
     // Check if product exists
     if (!product) {
-      return res.status(404).json({ 
-        message: "Product not found" 
+      return res.status(404).json({
+        message: "Product not found"
       });
     }
 
-   
+
     if (product.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-      return res.status(403).json({ 
-        message: "Not authorized to delete this product" 
+      return res.status(403).json({
+        message: "Not authorized to delete this product"
       });
     }
 
-    
+
     await product.deleteOne();
 
-    res.status(200).json({ 
+    // Clear the cache since a product was deleted
+    await product.deleteOne();
+
+// 🔥 CLEAR CACHE HERE
+try {
+  await redisClient.del(
+    'products',
+    'products:best-sellers',
+    'products:new-arrivals',
+    'similar-products'
+  );
+} catch (err) {
+  console.error("Redis error:", err);
+}
+
+    res.status(200).json({
       message: "Product deleted successfully",
       deletedProduct: {
         _id: product._id,
@@ -201,9 +240,9 @@ const deleteProduct = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ 
-      message: "Server Error", 
-      error: error.message 
+    res.status(500).json({
+      message: "Server Error",
+      error: error.message
     });
   }
 };
@@ -262,7 +301,7 @@ const getProducts = async (req, res) => {
     const pageNumber = Number(page) || 1;
     const pageSize = Number(limit) || 10;
     const skip = (pageNumber - 1) * pageSize;
-    
+
     console.log("Query Object:", query);
 
     const products = await Product.find(query).sort(sortOption).skip(skip).limit(pageSize);
@@ -296,7 +335,7 @@ const getProductById = async (req, res) => {
     res.status(200).json(product);
 
   } catch (error) {
-    
+
     if (error.name === "CastError") {
       return res.status(400).json({ message: "Invalid Product ID" });
     }
@@ -311,20 +350,20 @@ const getSimilarProducts = async (req, res) => {
   try {
     const { id } = req.params;
 
-   
+
     const product = await Product.findById(id);
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    
+
     const similarProducts = await Product.find({
-      _id: { $ne: id }, 
+      _id: { $ne: id },
       category: product.category,
       gender: product.gender
     })
-      .limit(4); 
+      .limit(4);
 
     res.status(200).json({
       success: true,
@@ -342,18 +381,20 @@ const getSimilarProducts = async (req, res) => {
 
 const getBestSellers = async (req, res) => {
   try {
-    const bestSeller = await Product.findOne()
-      .sort({ rating: -1 }); 
+    const bestSellers = await Product.find()
+      .sort({ rating: -1 })
+      .limit(8);
 
-    if (!bestSeller) {
+    if (!bestSellers || bestSellers.length === 0) {
       return res.status(404).json({
-        message: "No best seller found"
+        message: "No best sellers found"
       });
     }
 
     res.status(200).json({
       success: true,
-      bestSeller
+      count: bestSellers.length,
+      bestSellers
     });
 
   } catch (error) {
@@ -367,8 +408,8 @@ const getBestSellers = async (req, res) => {
 const getNewArrivals = async (req, res) => {
   try {
     const newArrivals = await Product.find()
-      .sort({ createdAt: -1 }) 
-      .limit(8); 
+      .sort({ createdAt: -1 })
+      .limit(8);
 
     res.status(200).json({
       success: true,
