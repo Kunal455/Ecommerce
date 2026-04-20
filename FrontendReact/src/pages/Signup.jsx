@@ -55,7 +55,7 @@ const Signup = () => {
                 type="text" 
                 required
                 className="w-full px-4 py-3.5 bg-white border border-gray-200 focus:border-[#101828] focus:ring-0 transition-colors text-sm font-sans placeholder-gray-300 outline-none rounded-none"
-                placeholder="Priya"
+                placeholder="Kunal"
                 value={formData.firstName}
                 onChange={(e) => setFormData({...formData, firstName: e.target.value})}
               />
@@ -66,7 +66,7 @@ const Signup = () => {
                 type="text" 
                 required
                 className="w-full px-4 py-3.5 bg-white border border-gray-200 focus:border-[#101828] focus:ring-0 transition-colors text-sm font-sans placeholder-gray-300 outline-none rounded-none"
-                placeholder="Sharma"
+                placeholder="Verma"
                 value={formData.lastName}
                 onChange={(e) => setFormData({...formData, lastName: e.target.value})}
               />
@@ -79,7 +79,7 @@ const Signup = () => {
               type="email" 
               required
               className="w-full px-4 py-3.5 bg-white border border-gray-200 focus:border-[#101828] focus:ring-0 transition-colors text-sm font-sans placeholder-gray-300 outline-none rounded-none"
-              placeholder="you@example.com"
+              placeholder="kunal@gmail.com"
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
             />
