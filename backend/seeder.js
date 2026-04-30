@@ -19,7 +19,8 @@ const seedData = async () => {
         await Cart.deleteMany();
         // Create a default admin User
         const createdUser = await User.create({
-            name: "Kunal kumar",
+            firstName: "Kunal",
+            lastName: "Kumar",
             email: "kk6547015@gmail.com",
             password: "1234567890",
             role: "admin",

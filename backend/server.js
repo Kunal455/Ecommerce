@@ -3,6 +3,7 @@ const cors = require("cors");
 const colors = require('colors')
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
+const { initRedis } = require("./config/redis");
 const userRouter = require('./routes/userRouter')
 const ProductRouter = require('./routes/ProductRoute')
 const CartRouter = require('./routes/CartRoutes')
@@ -17,6 +18,9 @@ dotenv.config();
 
 // connect to mongo
 connectDB()
+
+// connect to redis
+initRedis()
 
 
 const cookieParser = require("cookie-parser");

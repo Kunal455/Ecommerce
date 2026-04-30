@@ -237,11 +237,11 @@ const getProducts = async (req, res) => {
       query.name = { $regex: search, $options: "i" };
     }
 
-    if (category) query.category = category;
-    if (brand) query.brand = brand;
-    if (size) query.sizes = size;
-    if (color) query.colors = color;
-    if (material) query.material = material;
+    if (category) query.category = { $in: category.split(',') };
+    if (brand) query.brand = { $in: brand.split(',') };
+    if (size) query.sizes = { $in: size.split(',') };
+    if (color) query.colors = { $in: color.split(',') };
+    if (material) query.material = { $in: material.split(',') };
     if (gender) query.gender = gender;
     if (collection) query.collections = collection;
 
@@ -257,6 +257,7 @@ const getProducts = async (req, res) => {
     if (sortBy === "price_asc") sortOption.price = 1;
     if (sortBy === "price_desc") sortOption.price = -1;
     if (sortBy === "newest") sortOption.createdAt = -1;
+    if (sortBy === "rating_desc") sortOption.rating = -1;
 
     // 📄 Pagination
     const pageNumber = Number(page) || 1;
@@ -342,18 +343,19 @@ const getSimilarProducts = async (req, res) => {
 
 const getBestSellers = async (req, res) => {
   try {
-    const bestSeller = await Product.findOne()
-      .sort({ rating: -1 }); 
+    const bestSellers = await Product.find()
+      .sort({ rating: -1 })
+      .limit(8); 
 
-    if (!bestSeller) {
+    if (!bestSellers || bestSellers.length === 0) {
       return res.status(404).json({
-        message: "No best seller found"
+        message: "No best sellers found"
       });
     }
 
     res.status(200).json({
       success: true,
-      bestSeller
+      bestSellers
     });
 
   } catch (error) {
@@ -386,6 +388,45 @@ const getNewArrivals = async (req, res) => {
 
 
 
+const getFilters = async (req, res) => {
+  try {
+    const categories = await Product.distinct("category");
+    const brands = await Product.distinct("brand");
+    const colors = await Product.distinct("colors");
+    const sizes = await Product.distinct("sizes");
+    const materials = await Product.distinct("material");
+    const collections = await Product.distinct("collections");
+    const genders = await Product.distinct("gender");
+
+    // Remove any null, undefined or empty values
+    const cleanCategories = categories.filter(c => c && c.trim() !== "");
+    const cleanBrands = brands.filter(b => b && b.trim() !== "");
+    const cleanColors = colors.filter(c => c && c.trim() !== "");
+    const cleanSizes = sizes.filter(s => s && s.trim() !== "");
+    const cleanMaterials = materials.filter(m => m && m.trim() !== "");
+    const cleanCollections = collections.filter(c => c && c.trim() !== "");
+    const cleanGenders = genders.filter(g => g && g.trim() !== "");
+
+    res.status(200).json({
+      success: true,
+      filters: {
+        categories: cleanCategories,
+        brands: cleanBrands,
+        colors: cleanColors,
+        sizes: cleanSizes,
+        materials: cleanMaterials,
+        collections: cleanCollections,
+        genders: cleanGenders
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server Error",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   createProduct,
   updateProduct,
@@ -394,5 +435,6 @@ module.exports = {
   getProductById,
   getSimilarProducts,
   getBestSellers,
-  getNewArrivals
+  getNewArrivals,
+  getFilters
 };
