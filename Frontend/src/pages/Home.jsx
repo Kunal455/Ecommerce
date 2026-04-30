@@ -92,8 +92,8 @@ const Home = () => {
     const fetchDynamicData = async () => {
       try {
         const [newRes, bestRes] = await Promise.all([
-          axios.get('http://localhost:8000/api/v3/product/new-arrivals'),
-          axios.get('http://localhost:8000/api/v3/product/best-sellers')
+          axios.get('/api/v3/product/new-arrivals'),
+          axios.get('/api/v3/product/best-sellers')
         ]);
         
         // Ensure we handle the data property from the response if the backend wraps it

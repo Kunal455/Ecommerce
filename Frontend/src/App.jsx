@@ -9,12 +9,19 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Shop from './pages/Shop'
 import ProductDetails from './pages/ProductDetails'
+import Checkout from './pages/Checkout'
 import ProtectedRoute from './components/ProtectedRoute'
+import AdminRoute from './components/AdminRoute'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import ManageProducts from './pages/admin/ManageProducts'
+import ManageUsers from './pages/admin/ManageUsers'
+import ManageOrders from './pages/admin/ManageOrders'
 
 const AppContent = () => {
   const location = useLocation()
   const dispatch = useDispatch()
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/forgot-password'
+  const isAdminPage = location.pathname.startsWith('/admin')
 
   useEffect(() => {
     dispatch(loadUser())
@@ -22,7 +29,7 @@ const AppContent = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
+      {!isAdminPage && <Navbar />}
       <main className="flex-grow flex flex-col">
         <Routes>
           {/* Public Routes */}
@@ -42,11 +49,19 @@ const AppContent = () => {
           <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<div className="p-20 text-center font-serif text-2xl">My Profile (Protected)</div>} />
             <Route path="/orders" element={<div className="p-20 text-center font-serif text-2xl">My Orders (Protected)</div>} />
-            <Route path="/checkout" element={<div className="p-20 text-center font-serif text-2xl">Checkout (Protected)</div>} />
+            <Route path="/checkout" element={<Checkout />} />
+          </Route>
+
+          {/* Admin Routes */}
+          <Route element={<AdminRoute />}>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<ManageUsers />} />
+            <Route path="/admin/products" element={<ManageProducts />} />
+            <Route path="/admin/orders" element={<ManageOrders />} />
           </Route>
         </Routes>
       </main>
-      {!isAuthPage && <Footer />}
+      {!(isAuthPage || isAdminPage) && <Footer />}
     </div>
   )
 }

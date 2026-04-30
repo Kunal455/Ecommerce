@@ -10,7 +10,7 @@ export const addToCartBackend = createAsyncThunk(
   'cart/addToCartBackend',
   async (cartItem, thunkAPI) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/v3/cart', cartItem)
+      const response = await axios.post('/api/v3/cart', cartItem)
       return response.data
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data)

@@ -2,6 +2,8 @@ const Checkout = require("../models/Checkout");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Cart = require("../models/Cart");
+const Stripe = require("stripe");
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder");
 
 
 
@@ -203,4 +205,34 @@ const getCheckoutById = async (req, res) => {
   }
 };
 
-module.exports = { createCheckout, payCheckout, finalizeCheckout, getCheckoutById };
+const createCheckoutSession = async (req, res) => {
+  try {
+    const { checkoutId } = req.body;
+    
+    const checkout = await Checkout.findById(checkoutId);
+    
+    if (!checkout) {
+      return res.status(404).json({ message: "Checkout not found" });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(checkout.totalPrice * 100),
+      currency: "usd",
+      automatic_payment_methods: {
+        enabled: true,
+      },
+      metadata: {
+        checkoutId: checkout._id.toString()
+      }
+    });
+
+    res.status(200).json({
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    console.error("Stripe Error:", error);
+    res.status(500).json({ message: error.message || "Server Error" });
+  }
+};
+
+module.exports = { createCheckout, payCheckout, finalizeCheckout, getCheckoutById, createCheckoutSession };

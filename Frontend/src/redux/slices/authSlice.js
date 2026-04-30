@@ -10,7 +10,7 @@ export const mergeCartAfterAuth = createAsyncThunk(
     try {
       if (localItems.length === 0) return null;
       // Send local items to backend to merge
-      const response = await axios.post('http://localhost:8000/api/v3/cart/merge', { items: localItems })
+      const response = await axios.post('/api/v3/cart/merge', { items: localItems })
       // Clear local cart since it's merged
       thunkAPI.dispatch(clearGuestCart())
       return response.data
@@ -24,7 +24,7 @@ export const registerUser = createAsyncThunk(
   'auth/register',
   async (userData, thunkAPI) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/v3/user/register', userData)
+      const response = await axios.post('/api/v3/user/register', userData)
       // Retrieve local cart and merge
       const localCart = JSON.parse(localStorage.getItem('guestCart')) || []
       if(localCart.length > 0) {
@@ -41,7 +41,7 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async (userData, thunkAPI) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/v3/user/login', userData)
+      const response = await axios.post('/api/v3/user/login', userData)
       // Retrieve local cart and merge
       const localCart = JSON.parse(localStorage.getItem('guestCart')) || []
       if(localCart.length > 0) {
@@ -58,7 +58,7 @@ export const loadUser = createAsyncThunk(
   'auth/loadUser',
   async (_, thunkAPI) => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v3/user/me')
+      const response = await axios.get('/api/v3/user/me')
       return response.data
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data)

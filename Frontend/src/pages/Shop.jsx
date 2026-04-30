@@ -69,7 +69,7 @@ const Shop = ({ defaultGender = '', defaultCollection = '', defaultSortBy = 'new
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const res = await axios.get('http://localhost:8000/api/v3/product/filters')
+        const res = await axios.get('/api/v3/product/filters')
         setFilterOptions(res.data.filters)
       } catch (error) {
         console.error("Error fetching filter options:", error)
@@ -99,7 +99,7 @@ const Shop = ({ defaultGender = '', defaultCollection = '', defaultSortBy = 'new
       
       queryStr += `&minPrice=${filters.minPrice}&maxPrice=${filters.maxPrice}`
 
-      const res = await axios.get(`http://localhost:8000/api/v3/product${queryStr}`)
+      const res = await axios.get(`/api/v3/product${queryStr}`)
       setProducts(res.data.products)
       setTotalPages(res.data.totalPages)
       setTotalProducts(res.data.totalProducts)

@@ -172,6 +172,11 @@ const Navbar = () => {
           <div className="flex flex-col">
             {isAuthenticated && (
               <>
+                {user?.role === 'admin' && (
+                  <Link to="/admin/dashboard" onClick={closeProfile} className="px-6 py-4 bg-[#101828] text-[12px] font-bold tracking-[0.15em] text-[#c9a84c] uppercase transition-colors hover:bg-[#1a2e4a]">
+                    Admin Dashboard
+                  </Link>
+                )}
                 <Link to="/profile" onClick={closeProfile} className="px-6 py-4 hover:bg-[#f9fafb] text-[12px] font-bold tracking-[0.15em] text-[#101828] uppercase transition-colors border-l-2 border-transparent hover:border-[#c9a84c]">My Profile</Link>
                 <Link to="/orders" onClick={closeProfile} className="px-6 py-4 hover:bg-[#f9fafb] text-[12px] font-bold tracking-[0.15em] text-[#101828] uppercase transition-colors border-l-2 border-transparent hover:border-[#c9a84c]">Orders</Link>
               </>

@@ -42,7 +42,7 @@ const ProductDetails = () => {
         window.scrollTo(0, 0); // Reset scroll on load
         
         // Fetch Product Details
-        const res = await axios.get(`http://localhost:8000/api/v3/product/${id}`);
+        const res = await axios.get(`/api/v3/product/${id}`);
         const fetchedProduct = res.data; // Backend returns the product object directly
         setProduct(fetchedProduct);
         
@@ -56,7 +56,7 @@ const ProductDetails = () => {
         
         // Fetch Similar Products
         try {
-          const similarRes = await axios.get(`http://localhost:8000/api/v3/product/similar/${id}`);
+          const similarRes = await axios.get(`/api/v3/product/similar/${id}`);
           setSimilarProducts(similarRes.data.similarProducts || []); // Backend returns similarProducts
         } catch (simErr) {
           console.error("Error fetching similar products", simErr);
