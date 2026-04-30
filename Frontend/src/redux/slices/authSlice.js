@@ -54,6 +54,18 @@ export const loginUser = createAsyncThunk(
   }
 )
 
+export const loadUser = createAsyncThunk(
+  'auth/loadUser',
+  async (_, thunkAPI) => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/v3/user/me')
+      return response.data
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data)
+    }
+  }
+)
+
 const initialState = {
   user: null,
   isAuthenticated: false,
@@ -93,6 +105,18 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
+      })
+      .addCase(loadUser.pending, (state) => { state.loading = true })
+      .addCase(loadUser.fulfilled, (state, action) => {
+        state.loading = false
+        state.isAuthenticated = true
+        state.user = action.payload.user || action.payload
+        state.error = null
+      })
+      .addCase(loadUser.rejected, (state, action) => {
+        state.loading = false
+        state.isAuthenticated = false
+        state.user = null
       })
   }
 })

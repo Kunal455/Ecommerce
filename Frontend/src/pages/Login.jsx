@@ -40,6 +40,11 @@ const Login = () => {
         </div>
 
         {/* Form */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-[#c14a4a] text-[12px] font-bold tracking-wide">
+            {error.message || error || "Failed to sign in. Please check your credentials."}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-[10px] font-bold tracking-[0.15em] text-gray-500 uppercase mb-2">Email Address</label>

@@ -47,6 +47,11 @@ const Signup = () => {
         </div>
 
         {/* Form */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-[#c14a4a] text-[12px] font-bold tracking-wide">
+            {error.message || error || "Failed to create account. Please check your details."}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex gap-4">
             <div className="w-1/2">
