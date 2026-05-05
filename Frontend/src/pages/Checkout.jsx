@@ -22,6 +22,9 @@ const CheckoutForm = ({ clientSecret, checkoutId, onSuccess }) => {
 
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
+      confirmParams: {
+        return_url: window.location.href, // Strictly required for UPI
+      },
       redirect: "if_required", 
     });
 
@@ -42,6 +45,10 @@ const CheckoutForm = ({ clientSecret, checkoutId, onSuccess }) => {
         console.error("Error finalizing:", err);
         setMessage("Payment succeeded but order finalization failed.");
       }
+      setIsLoading(false);
+    } else {
+      // In case it's 'requires_action' or stuck, release the loading state so they aren't stuck on "Processing"
+      setMessage("Please complete the payment in the Stripe popup or your UPI app.");
       setIsLoading(false);
     }
   };
@@ -80,6 +87,8 @@ const Checkout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("card");
+
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -94,14 +103,16 @@ const Checkout = () => {
     fetchCart();
   }, []);
 
-  const handleAddressSubmit = async (e) => {
+  const handleAddressSubmit = (e) => {
     e.preventDefault();
-    
     if (!cart || !cart.products || cart.products.length === 0) {
       alert("Your cart is empty!");
       return;
     }
+    setStep(2);
+  };
 
+  const handlePaymentMethodSubmit = async () => {
     setIsProcessing(true);
     try {
       const checkoutItems = cart.products.map(p => ({
@@ -113,22 +124,44 @@ const Checkout = () => {
 
       const checkoutRes = await axios.post('/api/v3/checkout', {
         checkoutItems,
-        shippingAddress: address,
-        paymentMethod: "Stripe"
+        shippingAddress: {
+          address: address.street,
+          city: address.city,
+          postalCode: address.postalCode,
+          country: address.country
+        },
+        paymentMethod: selectedPaymentMethod === "cod" ? "Cash on Delivery" : "Stripe"
       }, { withCredentials: true });
 
       const newCheckoutId = checkoutRes.data.checkout._id;
       setCheckoutId(newCheckoutId);
 
-      const secretRes = await axios.post('/api/v3/checkout/create-checkout-session', {
-        checkoutId: newCheckoutId
-      }, { withCredentials: true });
+      if (selectedPaymentMethod !== "cod") {
+        const secretRes = await axios.post('/api/v3/checkout/create-checkout-session', {
+          checkoutId: newCheckoutId,
+          requestedMethod: selectedPaymentMethod // "card" or "upi"
+        }, { withCredentials: true });
 
-      setClientSecret(secretRes.data.clientSecret);
-      setStep(2);
+        setClientSecret(secretRes.data.clientSecret);
+      }
+      
+      setStep(3);
     } catch (error) {
       console.error("Error creating checkout session", error);
-      alert("Failed to initialize checkout.");
+      alert(error.response?.data?.message || "Failed to initialize checkout.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleCODConfirm = async () => {
+    setIsProcessing(true);
+    try {
+      await axios.post(`/api/v3/checkout/${checkoutId}/finalize`, {}, { withCredentials: true });
+      handleSuccess();
+    } catch (error) {
+      console.error("Error confirming COD", error);
+      alert("Failed to confirm order.");
     } finally {
       setIsProcessing(false);
     }
@@ -165,10 +198,12 @@ const Checkout = () => {
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 tracking-tight">Checkout</h2>
           
           {/* Progress Indicator */}
-          <div className="flex items-center space-x-4 mb-8">
+          <div className="flex items-center space-x-2 sm:space-x-4 mb-8">
             <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold ${step >= 1 ? 'bg-black text-white' : 'bg-gray-200 text-gray-500'}`}>1</div>
             <div className={`h-1 flex-1 rounded ${step >= 2 ? 'bg-black' : 'bg-gray-200'}`}></div>
             <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold ${step >= 2 ? 'bg-black text-white' : 'bg-gray-200 text-gray-500'}`}>2</div>
+            <div className={`h-1 flex-1 rounded ${step >= 3 ? 'bg-black' : 'bg-gray-200'}`}></div>
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold ${step >= 3 ? 'bg-black text-white' : 'bg-gray-200 text-gray-500'}`}>3</div>
           </div>
 
           {step === 1 && (
@@ -197,24 +232,134 @@ const Checkout = () => {
                 <input required type="text" value={address.country} onChange={(e) => setAddress({...address, country: e.target.value})} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-black outline-none transition-all" placeholder="United States" />
               </div>
               
-              <button disabled={isProcessing} type="submit" className="w-full mt-8 bg-gray-900 text-white py-3.5 rounded-xl font-semibold hover:bg-black transition-all shadow-md active:scale-95 disabled:opacity-70 disabled:active:scale-100 flex justify-center items-center">
-                {isProcessing ? (
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                ) : null}
-                {isProcessing ? "Processing..." : "Continue to Payment"}
+              <button type="submit" className="w-full mt-8 bg-gray-900 text-white py-3.5 rounded-xl font-semibold hover:bg-black transition-all shadow-md active:scale-95 flex justify-center items-center">
+                Continue to Payment Method
               </button>
             </form>
           )}
 
-          {step === 2 && clientSecret && (
+          {step === 2 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+              <h3 className="text-xl font-semibold text-gray-800 mb-6">Select Payment Method</h3>
+              
+              <div className="space-y-4">
+                {/* 1. Credit / Debit Card Tab */}
+                <label className={`block border rounded-xl p-5 cursor-pointer transition-all ${selectedPaymentMethod === 'card' ? 'border-black bg-gray-50 ring-1 ring-black' : 'border-gray-200 hover:border-gray-300'}`}>
+                  <div className="flex items-center">
+                    <input type="radio" name="paymentMethod" value="card" checked={selectedPaymentMethod === 'card'} onChange={() => setSelectedPaymentMethod('card')} className="w-5 h-5 text-black border-gray-300 focus:ring-black" />
+                    <div className="ml-4 flex-1">
+                      <span className="block text-base font-semibold text-gray-900">Credit / Debit Card</span>
+                      <span className="block text-sm text-gray-500 mt-1">Securely pay with Visa, Mastercard, or RuPay.</span>
+                    </div>
+                    <div className="flex space-x-2 opacity-70">
+                      <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4C2.89 4 2.01 4.89 2.01 6L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                    </div>
+                  </div>
+                </label>
+
+                {/* 2. UPI Tab */}
+                <label className={`block border rounded-xl p-5 cursor-pointer transition-all ${selectedPaymentMethod === 'upi' ? 'border-black bg-gray-50 ring-1 ring-black' : 'border-gray-200 hover:border-gray-300'}`}>
+                  <div className="flex items-center">
+                    <input type="radio" name="paymentMethod" value="upi" checked={selectedPaymentMethod === 'upi'} onChange={() => setSelectedPaymentMethod('upi')} className="w-5 h-5 text-black border-gray-300 focus:ring-black" />
+                    <div className="ml-4 flex-1">
+                      <span className="block text-base font-semibold text-gray-900">UPI (Paytm, PhonePe, GPay)</span>
+                      <span className="block text-sm text-gray-500 mt-1">Pay instantly via any UPI app or scanner.</span>
+                    </div>
+                    <div className="flex space-x-2 opacity-70">
+                      <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                    </div>
+                  </div>
+                </label>
+
+                {/* 3. COD Tab */}
+                <label className={`block border rounded-xl p-5 cursor-pointer transition-all ${selectedPaymentMethod === 'cod' ? 'border-black bg-gray-50 ring-1 ring-black' : 'border-gray-200 hover:border-gray-300'}`}>
+                  <div className="flex items-center">
+                    <input type="radio" name="paymentMethod" value="cod" checked={selectedPaymentMethod === 'cod'} onChange={() => setSelectedPaymentMethod('cod')} className="w-5 h-5 text-black border-gray-300 focus:ring-black" />
+                    <div className="ml-4 flex-1">
+                      <span className="block text-base font-semibold text-gray-900">Cash on Delivery</span>
+                      <span className="block text-sm text-gray-500 mt-1">Pay with cash when your order is delivered.</span>
+                    </div>
+                    <div className="flex space-x-2 opacity-70">
+                      <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 mt-8">
+                <button onClick={() => setStep(1)} disabled={isProcessing} className="px-6 py-3.5 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-all disabled:opacity-50">
+                  Back
+                </button>
+                <button disabled={isProcessing} onClick={handlePaymentMethodSubmit} className="flex-1 bg-gray-900 text-white py-3.5 rounded-xl font-semibold hover:bg-black transition-all shadow-md active:scale-95 flex justify-center items-center disabled:opacity-70">
+                  {isProcessing ? "Processing..." : `Continue securely with ${selectedPaymentMethod === 'cod' ? 'COD' : selectedPaymentMethod.toUpperCase()}`}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-              <h3 className="text-xl font-semibold text-gray-800 mb-6">Payment Details</h3>
-              <Elements options={{ clientSecret, appearance: { theme: 'stripe', variables: { colorPrimary: '#000', borderRadius: '12px' } } }} stripe={stripePromise}>
-                <CheckoutForm clientSecret={clientSecret} checkoutId={checkoutId} onSuccess={handleSuccess} />
-              </Elements>
-              <button onClick={() => setStep(1)} className="mt-6 text-sm text-gray-500 hover:text-black font-medium transition-colors flex items-center">
+              {selectedPaymentMethod === "cod" ? (
+                <div className="text-center p-8 border border-gray-200 rounded-2xl bg-gray-50">
+                  <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Confirm Your Order</h3>
+                  <p className="text-gray-500 mb-8 max-w-md mx-auto">You have selected Cash on Delivery. Please confirm your order below to finalize your purchase. You will pay when the items arrive.</p>
+                  
+                  <button 
+                    disabled={isProcessing}
+                    onClick={handleCODConfirm}
+                    className="w-full max-w-md mx-auto bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors shadow-lg disabled:opacity-50 flex justify-center items-center"
+                  >
+                    {isProcessing ? "Confirming..." : "Confirm COD Order"}
+                  </button>
+                </div>
+              ) : clientSecret ? (
+                <>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-6">Payment Details</h3>
+                  {clientSecret === "dummy_secret_for_testing" ? (
+                    <div className="bg-yellow-50 p-6 border border-yellow-200 rounded-xl text-center shadow-sm">
+                      <div className="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                      </div>
+                      <h4 className="text-lg font-bold text-yellow-800 mb-2">Test Mode Active</h4>
+                      <p className="text-sm text-yellow-700 mb-6">Stripe keys are not configured. You can simulate a successful payment below to test the order creation workflow.</p>
+                      <button 
+                        disabled={isProcessing}
+                        onClick={async () => {
+                          setIsProcessing(true);
+                          try {
+                            await axios.put(`/api/v3/checkout/${checkoutId}/pay`, {
+                              paymentStatus: "paid",
+                              paymentDetails: { id: "simulated_payment_id" }
+                            }, { withCredentials: true });
+                            await axios.post(`/api/v3/checkout/${checkoutId}/finalize`, {}, { withCredentials: true });
+                            handleSuccess();
+                          } catch (err) {
+                            alert("Simulated payment failed");
+                            console.error(err);
+                          }
+                          setIsProcessing(false);
+                        }}
+                        className="w-full bg-yellow-500 text-white py-3.5 rounded-xl font-bold uppercase tracking-widest hover:bg-yellow-600 transition-colors shadow-md disabled:opacity-50"
+                      >
+                        {isProcessing ? "Simulating..." : "Simulate Payment Success"}
+                      </button>
+                    </div>
+                  ) : (
+                    <Elements options={{ clientSecret, appearance: { theme: 'stripe', variables: { colorPrimary: '#000', borderRadius: '12px' } } }} stripe={stripePromise}>
+                      <CheckoutForm clientSecret={clientSecret} checkoutId={checkoutId} onSuccess={handleSuccess} />
+                    </Elements>
+                  )}
+                </>
+              ) : (
+                <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div></div>
+              )}
+              
+              <button disabled={isProcessing} onClick={() => setStep(2)} className="mt-6 text-sm text-gray-500 hover:text-black font-medium transition-colors flex items-center">
                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
-                Back to shipping
+                Back to payment selection
               </button>
             </div>
           )}

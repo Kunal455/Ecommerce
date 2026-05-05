@@ -2,8 +2,13 @@ const Checkout = require("../models/Checkout");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Cart = require("../models/Cart");
+const fs = require("fs");
+const path = require("path");
+const dotenv = require("dotenv");
 const Stripe = require("stripe");
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder");
+
+let globalStripeKey = process.env.STRIPE_SECRET_KEY || "sk_test_placeholder";
+let stripe = new Stripe(globalStripeKey);
 
 
 
@@ -135,8 +140,8 @@ const finalizeCheckout = async (req, res) => {
       });
     }
 
-    // Ensure payment is completed
-    if (!checkout.isPaid) {
+    // Ensure payment is completed (unless it's Cash on Delivery)
+    if (!checkout.isPaid && checkout.paymentMethod !== "Cash on Delivery") {
       return res.status(400).json({
         message: "Checkout not paid",
       });
@@ -207,7 +212,7 @@ const getCheckoutById = async (req, res) => {
 
 const createCheckoutSession = async (req, res) => {
   try {
-    const { checkoutId } = req.body;
+    const { checkoutId, requestedMethod } = req.body;
     
     const checkout = await Checkout.findById(checkoutId);
     
@@ -215,12 +220,33 @@ const createCheckoutSession = async (req, res) => {
       return res.status(404).json({ message: "Checkout not found" });
     }
 
+    // Safely load the key from .env file or process.env
+    let activeKey = globalStripeKey;
+    try {
+      const envPath = path.resolve(__dirname, "../.env");
+      if (fs.existsSync(envPath)) {
+        const envConfig = dotenv.parse(fs.readFileSync(envPath));
+        if (envConfig.STRIPE_SECRET_KEY && envConfig.STRIPE_SECRET_KEY !== "sk_test_placeholder") {
+          activeKey = envConfig.STRIPE_SECRET_KEY;
+          stripe = new Stripe(activeKey);
+        }
+      }
+    } catch (e) {
+      console.error("Error reading .env dynamically:", e);
+    }
+
+    // Bypass Stripe if no valid key is provided
+    if (!activeKey || activeKey === "sk_test_placeholder" || activeKey.includes("placeholder")) {
+      return res.status(200).json({
+        clientSecret: "dummy_secret_for_testing"
+      });
+    }
+
+    // Create a payment intent strictly locked to the user's requested method
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(checkout.totalPrice * 100),
-      currency: "usd",
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      currency: "inr",
+      payment_method_types: [requestedMethod || "card"],
       metadata: {
         checkoutId: checkout._id.toString()
       }

@@ -34,6 +34,7 @@ const ProductDetails = () => {
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [addedSuccess, setAddedSuccess] = useState(false);
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -85,6 +86,7 @@ const ProductDetails = () => {
     
     const cartPayload = {
       product: product._id,
+      productId: product._id,
       name: product.name,
       price: product.discountPrice && product.discountPrice < product.price ? product.discountPrice : product.price,
       image: product.images?.[0]?.url || '',
@@ -100,17 +102,11 @@ const ProductDetails = () => {
         dispatch(addToGuestCart(cartPayload));
       }
       
-      // Show success feedback (could be a toast in the future)
-      const btn = document.getElementById('add-to-cart-btn');
-      if (btn) {
-        const originalText = btn.innerText;
-        btn.innerText = 'ADDED TO CART ✓';
-        btn.classList.add('bg-[#1e4620]');
-        setTimeout(() => {
-          btn.innerText = originalText;
-          btn.classList.remove('bg-[#1e4620]');
-        }, 2000);
-      }
+      // Use React state for success feedback
+      setAddedSuccess(true);
+      setTimeout(() => {
+        setAddedSuccess(false);
+      }, 2000);
     } catch (error) {
       console.error("Failed to add to cart:", error);
       alert("Failed to add to cart. Please try again.");
@@ -302,11 +298,15 @@ const ProductDetails = () => {
               <button 
                 id="add-to-cart-btn"
                 onClick={handleAddToCart}
-                disabled={addingToCart || product.countInStock === 0}
-                className="w-full bg-[#101828] text-white h-14 flex items-center justify-center gap-3 font-bold text-[12px] tracking-[0.2em] uppercase hover:bg-[#1a2e4a] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                disabled={addingToCart || addedSuccess || product.countInStock === 0}
+                className={`w-full text-white h-14 flex items-center justify-center gap-3 font-bold text-[12px] tracking-[0.2em] uppercase transition-all shadow-md hover:shadow-lg ${
+                  addedSuccess ? 'bg-[#1e4620]' : 'bg-[#101828] hover:bg-[#1a2e4a] disabled:opacity-50 disabled:cursor-not-allowed'
+                }`}
               >
                 {addingToCart ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : addedSuccess ? (
+                  'ADDED TO CART ✓'
                 ) : (
                   <>
                     <ShoppingBag size={18} />

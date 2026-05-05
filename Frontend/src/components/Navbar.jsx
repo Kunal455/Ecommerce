@@ -3,6 +3,7 @@ import { Search, User, Heart, ShoppingBag, X, Trash2 } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { logout } from '../redux/slices/authSlice'
+import { removeFromGuestCart, removeFromCartBackend } from '../redux/slices/cartSlice'
 
 const Navbar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
@@ -23,6 +24,19 @@ const Navbar = () => {
 
   const closeProfile = () => setIsProfileOpen(false)
   const closeCart = () => setIsCartOpen(false)
+
+  const handleRemoveItem = (item) => {
+    const payload = {
+      productId: item.productId || item.product,
+      size: item.size,
+      color: item.color
+    };
+    if (isAuthenticated) {
+      dispatch(removeFromCartBackend(payload));
+    } else {
+      dispatch(removeFromGuestCart(payload));
+    }
+  };
 
   return (
     <>
@@ -238,7 +252,10 @@ const Navbar = () => {
                   <div className="flex-1 flex flex-col">
                     <div className="flex justify-between items-start">
                       <h3 className="text-sm font-bold text-[#101828]">{item.name || 'Product Name'}</h3>
-                      <button className="text-gray-400 hover:text-red-500">
+                      <button 
+                        onClick={() => handleRemoveItem(item)}
+                        className="text-gray-400 hover:text-red-500 transition-colors"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -270,6 +287,10 @@ const Navbar = () => {
               View Full Bag
             </Link>
             <button 
+              onClick={() => {
+                closeCart();
+                navigate('/checkout');
+              }}
               className="w-full text-center py-4 bg-[#d4af37] text-white text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-[#c9a84c] transition-colors shadow-sm"
             >
               Checkout Now

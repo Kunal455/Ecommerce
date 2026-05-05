@@ -18,6 +18,30 @@ export const addToCartBackend = createAsyncThunk(
   }
 )
 
+export const removeFromCartBackend = createAsyncThunk(
+  'cart/removeFromCartBackend',
+  async (cartItem, thunkAPI) => {
+    try {
+      const response = await axios.delete('/api/v3/cart', { data: cartItem })
+      return response.data
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data)
+    }
+  }
+)
+
+export const fetchUserCart = createAsyncThunk(
+  'cart/fetchUserCart',
+  async (_, thunkAPI) => {
+    try {
+      const response = await axios.get('/api/v3/cart')
+      return response.data
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || 'Failed to fetch cart')
+    }
+  }
+)
+
 const cartSlice = createSlice({
   name: 'cart',
   initialState: {
@@ -39,6 +63,16 @@ const cartSlice = createSlice({
       }
       localStorage.setItem('guestCart', JSON.stringify(state.items))
     },
+    removeFromGuestCart: (state, action) => {
+      state.items = state.items.filter(
+        i => !(
+          (i.product === action.payload.productId || i.productId === action.payload.productId) && 
+          i.size === action.payload.size && 
+          i.color === action.payload.color
+        )
+      )
+      localStorage.setItem('guestCart', JSON.stringify(state.items))
+    },
     clearGuestCart: (state) => {
       state.items = []
       localStorage.removeItem('guestCart')
@@ -49,16 +83,42 @@ const cartSlice = createSlice({
       .addCase(addToCartBackend.pending, (state) => {
         state.loading = true
       })
-      .addCase(addToCartBackend.fulfilled, (state) => {
+      .addCase(addToCartBackend.fulfilled, (state, action) => {
         state.loading = false
         state.error = null
+        if (action.payload.cart && action.payload.cart.products) {
+          state.items = action.payload.cart.products
+        }
       })
       .addCase(addToCartBackend.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      .addCase(fetchUserCart.fulfilled, (state, action) => {
+        if (action.payload.cart && action.payload.cart.products) {
+          state.items = action.payload.cart.products
+        }
+      })
+      .addCase(fetchUserCart.rejected, (state) => {
+        // If fetch fails (e.g., no cart exists), default to empty or keep local
+        state.items = []
+      })
+      .addCase(removeFromCartBackend.pending, (state) => {
+        state.loading = true
+      })
+      .addCase(removeFromCartBackend.fulfilled, (state, action) => {
+        state.loading = false
+        state.error = null
+        if (action.payload.cart && action.payload.cart.products) {
+          state.items = action.payload.cart.products
+        }
+      })
+      .addCase(removeFromCartBackend.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
       })
   }
 })
 
-export const { addToGuestCart, clearGuestCart } = cartSlice.actions
+export const { addToGuestCart, removeFromGuestCart, clearGuestCart } = cartSlice.actions
 export default cartSlice.reducer

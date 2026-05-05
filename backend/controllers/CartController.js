@@ -192,60 +192,47 @@ const getUserCart = async (req, res) => {
 
 
 const mergeCart = async (req, res) => {
-  const { guestId } = req.body;
+  const { items } = req.body;
 
   try {
-    // Find guest cart
-    const guestCart = await Cart.findOne({ guestId });
-
     // Find logged-in user's cart
     let userCart = await Cart.findOne({ user: req.user._id });
 
-    // If guest cart doesn't exist
-    if (!guestCart) {
-      return res.status(200).json({
-        success: true,
-        message: "No guest cart found",
-        cart: userCart
-      });
-    }
-
-    // If user cart doesn't exist → convert guest cart into user cart
+    // If user cart doesn't exist, create it
     if (!userCart) {
-      guestCart.user = req.user._id;
-      guestCart.guestId = undefined;
-
-      await guestCart.save();
-
-      return res.status(200).json({
-        success: true,
-        message: "Guest cart assigned to user",
-        cart: guestCart
+      userCart = new Cart({
+        user: req.user._id,
+        products: []
       });
     }
 
-    // Merge products
-    guestCart.products.forEach((guestItem) => {
+    if (items && items.length > 0) {
+      // Merge products
+      items.forEach((guestItem) => {
+        const index = userCart.products.findIndex(
+          (item) =>
+            item.productId.toString() === (guestItem.productId || guestItem.product).toString() &&
+            item.size === guestItem.size &&
+            item.color === guestItem.color
+        );
 
-      const index = userCart.products.findIndex(
-        (item) =>
-          item.productId.toString() === guestItem.productId.toString() &&
-          item.size === guestItem.size &&
-          item.color === guestItem.color
-      );
+        if (index > -1) {
+          userCart.products[index].quantity += guestItem.quantity;
+        } else {
+          userCart.products.push({
+            productId: guestItem.productId || guestItem.product,
+            name: guestItem.name,
+            image: guestItem.image,
+            price: guestItem.price,
+            size: guestItem.size,
+            color: guestItem.color,
+            quantity: guestItem.quantity
+          });
+        }
+      });
 
-      if (index > -1) {
-        userCart.products[index].quantity += guestItem.quantity;
-      } else {
-        userCart.products.push(guestItem);
-      }
-
-    });
-
-    await userCart.save();
-
-    // Delete guest cart
-    await Cart.findOneAndDelete({ guestId });
+      await userCart.save();
+    }
 
     res.status(200).json({
       success: true,

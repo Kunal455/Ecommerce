@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { loadUser } from './redux/slices/authSlice'
+import { fetchUserCart } from './redux/slices/cartSlice'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Home from './pages/Home'
@@ -16,6 +17,9 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import ManageProducts from './pages/admin/ManageProducts'
 import ManageUsers from './pages/admin/ManageUsers'
 import ManageOrders from './pages/admin/ManageOrders'
+import Profile from './pages/Profile'
+import Orders from './pages/Orders'
+import Cart from './pages/Cart'
 
 const AppContent = () => {
   const location = useLocation()
@@ -23,9 +27,17 @@ const AppContent = () => {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/forgot-password'
   const isAdminPage = location.pathname.startsWith('/admin')
 
+  const { isAuthenticated } = useSelector(state => state.auth)
+
   useEffect(() => {
     dispatch(loadUser())
   }, [dispatch])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchUserCart())
+    }
+  }, [isAuthenticated, dispatch])
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -37,6 +49,7 @@ const AppContent = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Signup />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/men" element={<Shop defaultGender="Men" />} />
           <Route path="/women" element={<Shop defaultGender="Women" />} />
@@ -47,8 +60,8 @@ const AppContent = () => {
           
           {/* Protected Routes (Only for logged-in users) */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/profile" element={<div className="p-20 text-center font-serif text-2xl">My Profile (Protected)</div>} />
-            <Route path="/orders" element={<div className="p-20 text-center font-serif text-2xl">My Orders (Protected)</div>} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/orders" element={<Orders />} />
             <Route path="/checkout" element={<Checkout />} />
           </Route>
 

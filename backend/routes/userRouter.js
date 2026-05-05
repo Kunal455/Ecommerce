@@ -4,7 +4,8 @@ const {
   loginUser,
   forgotPassword,
   logoutUser,
-  getUserDetails
+  getUserDetails,
+  updateUserProfile
 }  = require('../controllers/userController')
 const { protect } = require("../Middleware/authMiddleware");
 const Router = express.Router()
@@ -14,5 +15,6 @@ Router.post("/login", loginUser);
 Router.post("/forgot-password", forgotPassword);
 Router.post("/logout", logoutUser);
 Router.get("/me", protect, getUserDetails);
+Router.put("/profile", protect, updateUserProfile);
 
 module.exports = Router
