@@ -52,19 +52,22 @@ const Shop = ({ defaultGender = '', defaultCollection = '', defaultSortBy = 'new
     maxPrice: 15000,
     colors: [],
     sortBy: defaultSortBy,
-    page: 1
+    page: 1,
+    search: new URLSearchParams(location.search).get('search') || ''
   })
 
-  // Whenever default props change, reset relevant filters
+  // Whenever default props or location change, reset relevant filters
   useEffect(() => {
+    const urlSearch = new URLSearchParams(location.search).get('search') || '';
     setFilters(prev => ({ 
       ...prev, 
       gender: defaultGender, 
       collection: defaultCollection, 
       sortBy: defaultSortBy,
+      search: urlSearch,
       page: 1 
     }))
-  }, [defaultGender, defaultCollection, defaultSortBy])
+  }, [defaultGender, defaultCollection, defaultSortBy, location.search])
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -96,6 +99,7 @@ const Shop = ({ defaultGender = '', defaultCollection = '', defaultSortBy = 'new
       if (filters.sizes.length > 0) queryStr += `&size=${filters.sizes.join(',')}`
       if (filters.materials.length > 0) queryStr += `&material=${filters.materials.join(',')}`
       if (filters.collections.length > 0) queryStr += `&collection=${filters.collections.join(',')}`
+      if (filters.search) queryStr += `&search=${encodeURIComponent(filters.search)}`
       
       queryStr += `&minPrice=${filters.minPrice}&maxPrice=${filters.maxPrice}`
 
@@ -136,14 +140,17 @@ const Shop = ({ defaultGender = '', defaultCollection = '', defaultSortBy = 'new
       maxPrice: 15000,
       colors: [],
       sortBy: 'newest',
-      page: 1
+      page: 1,
+      search: '' // Clear search too
     })
   }
 
   // Generate breadcrumb
   const getBreadcrumb = () => {
     let current = 'All Products'
-    if (titleOverride) {
+    if (filters.search) {
+      current = `Search Results for "${filters.search}"`
+    } else if (titleOverride) {
       current = titleOverride
     } else if (defaultGender) {
       current = `${defaultGender}'s Collection`

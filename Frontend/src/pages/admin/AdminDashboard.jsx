@@ -49,10 +49,6 @@ export const AdminSidebar = () => {
 
       {/* Bottom Actions */}
       <div className="p-4 border-t border-gray-800 space-y-2">
-        <button className="flex items-center gap-4 px-4 py-3 text-gray-400 hover:text-white w-full transition-colors text-sm font-medium">
-          <Settings size={20} />
-          Settings
-        </button>
         <button 
           onClick={handleLogout}
           className="flex items-center gap-4 px-4 py-3 text-[#e27c62] hover:bg-[#e27c62]/10 rounded-lg w-full transition-colors text-sm font-medium"

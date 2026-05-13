@@ -234,7 +234,17 @@ const getProducts = async (req, res) => {
 
     // 🔎 Search
     if (search) {
-      query.name = { $regex: search, $options: "i" };
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } },
+        { brand: { $regex: search, $options: "i" } },
+        { gender: { $regex: search, $options: "i" } },
+        { material: { $regex: search, $options: "i" } },
+        { collections: { $regex: search, $options: "i" } },
+        { colors: { $regex: search, $options: "i" } },
+        { sizes: { $regex: search, $options: "i" } }
+      ];
     }
 
     if (category) query.category = { $in: category.split(',') };

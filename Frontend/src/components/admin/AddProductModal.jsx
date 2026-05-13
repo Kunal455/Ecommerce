@@ -19,6 +19,10 @@ const AddProductModal = ({ isOpen, onClose }) => {
     category: '',
     brand: '',
     gender: 'Unisex',
+    sizes: '',
+    colors: '',
+    collections: '',
+    material: '',
   });
 
   if (!isOpen) return null;
@@ -57,16 +61,21 @@ const AddProductModal = ({ isOpen, onClose }) => {
       // Step 2: Create Product
       const productPayload = {
         ...formData,
+        description: formData.description || 'No description provided.',
         price: Number(formData.price),
         discountPrice: Number(formData.discountPrice),
         countInStock: Number(formData.countInStock),
+        sizes: formData.sizes ? formData.sizes.split(',').map(s => s.trim()).filter(Boolean) : ['One Size'],
+        colors: formData.colors ? formData.colors.split(',').map(c => c.trim()).filter(Boolean) : ['Default'],
+        collections: formData.collections ? formData.collections.split(',').map(c => c.trim()).filter(Boolean) : ['New Arrivals'],
+        material: formData.material || '',
         images: imageUrl ? [{ url: imageUrl, altText: formData.name }] : []
       };
 
       await dispatch(createAdminProduct(productPayload)).unwrap();
       
       // Reset & Close
-      setFormData({ name: '', description: '', price: '', discountPrice: 0, countInStock: '', category: '', brand: '', gender: 'Unisex' });
+      setFormData({ name: '', description: '', price: '', discountPrice: 0, countInStock: '', category: '', brand: '', gender: 'Unisex', sizes: '', colors: '', collections: '', material: '' });
       setImageFile(null);
       setPreview(null);
       onClose();
@@ -139,6 +148,17 @@ const AddProductModal = ({ isOpen, onClose }) => {
                     </select>
                   </div>
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold tracking-[0.15em] text-gray-500 uppercase mb-2">Sizes (Comma separated)</label>
+                    <input type="text" name="sizes" value={formData.sizes} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-[#c9a84c] outline-none text-sm" placeholder="S, M, L, XL" />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold tracking-[0.15em] text-gray-500 uppercase mb-2">Colors (Comma separated)</label>
+                    <input type="text" name="colors" value={formData.colors} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-[#c9a84c] outline-none text-sm" placeholder="Black, White, Red" />
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -164,7 +184,18 @@ const AddProductModal = ({ isOpen, onClose }) => {
 
                 <div>
                   <label className="block text-[11px] font-bold tracking-[0.15em] text-gray-500 uppercase mb-2">Description</label>
-                  <textarea name="description" rows="4" value={formData.description} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-[#c9a84c] outline-none text-sm resize-none" placeholder="Enter product details..."></textarea>
+                  <textarea name="description" rows="3" value={formData.description} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-[#c9a84c] outline-none text-sm resize-none" placeholder="Enter product details..."></textarea>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold tracking-[0.15em] text-gray-500 uppercase mb-2">Collections</label>
+                    <input type="text" name="collections" value={formData.collections} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-[#c9a84c] outline-none text-sm" placeholder="Summer, Casual" />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold tracking-[0.15em] text-gray-500 uppercase mb-2">Material</label>
+                    <input type="text" name="material" value={formData.material} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-[#c9a84c] outline-none text-sm" placeholder="100% Cotton" />
+                  </div>
                 </div>
               </div>
             </div>

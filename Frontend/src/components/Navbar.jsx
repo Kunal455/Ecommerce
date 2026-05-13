@@ -8,6 +8,7 @@ import { removeFromGuestCart, removeFromCartBackend } from '../redux/slices/cart
 const Navbar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -84,6 +85,14 @@ const Navbar = () => {
                   <input
                     type="text"
                     placeholder="Search products..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && searchTerm.trim()) {
+                        navigate(`/shop?search=${encodeURIComponent(searchTerm.trim())}`);
+                        setSearchTerm(''); // Clear input after search
+                      }
+                    }}
                     className="w-full bg-[#f5f5f5] text-gray-800 placeholder-gray-500 rounded-sm py-3.5 pl-12 pr-4 text-[14px] font-medium outline-none focus:ring-1 focus:ring-gray-300 transition-all border-none"
                   />
                 </div>
