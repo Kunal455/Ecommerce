@@ -3,7 +3,8 @@ const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const sendToken = require("../utils/sendToken");
-
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const registerUser = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
@@ -157,4 +158,47 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, forgotPassword, logoutUser, getUserDetails, updateUserProfile };
+const googleAuth = async (req, res) => {
+  try {
+    const { token } = req.body;
+    
+    // Fetch user profile using the access token provided by the frontend
+    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch user profile from Google');
+    }
+
+    const payload = await response.json();
+    const { email, given_name, family_name, sub, picture } = payload;
+
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // If user exists but doesn't have a googleId, link the account
+      if (!user.googleId) {
+        user.googleId = sub;
+        user.avatar = picture;
+        await user.save();
+      }
+    } else {
+      // Create a new user if they don't exist
+      user = await User.create({
+        firstName: given_name,
+        lastName: family_name || ' ',
+        email,
+        googleId: sub,
+        avatar: picture
+      });
+    }
+
+    sendToken(user, res, 200);
+  } catch (error) {
+    console.log("Google Auth Error:", error);
+    res.status(401).json({ message: "Invalid Google Token" });
+  }
+};
+
+module.exports = { registerUser, loginUser, forgotPassword, logoutUser, getUserDetails, updateUserProfile, googleAuth };

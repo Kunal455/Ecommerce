@@ -3,13 +3,23 @@ import AuthLayout from '../components/AuthLayout'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
-import { loginUser } from '../redux/slices/authSlice'
+import { loginUser, googleLoginUser } from '../redux/slices/authSlice'
+import { useGoogleLogin } from '@react-oauth/google'
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { loading, error } = useSelector(state => state.auth)
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: (tokenResponse) => {
+      dispatch(googleLoginUser(tokenResponse.credential || tokenResponse.access_token)).then((action) => {
+        if(!action.error) navigate('/')
+      })
+    },
+    onError: () => console.log('Google Login Failed'),
+  })
 
   const [formData, setFormData] = useState({ email: '', password: '' })
 
@@ -100,6 +110,7 @@ const Login = () => {
 
           <button 
             type="button"
+            onClick={() => googleLogin()}
             className="w-full bg-white text-[#101828] py-3.5 px-4 font-bold tracking-[0.2em] text-[11px] border border-gray-200 shadow-sm hover:bg-gray-50 flex items-center justify-center gap-3 uppercase transition-all rounded-none"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">

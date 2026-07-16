@@ -130,7 +130,7 @@ const Orders = () => {
 
                 {/* Order Footer */}
                 <div className="bg-gray-50 p-4 border-t border-gray-100 flex justify-between items-center">
-                  <span className="text-xs text-gray-500">Paid via Stripe</span>
+                  <span className="text-xs text-gray-500">Paid via {order.paymentMethod || 'Razorpay'}</span>
                   <Link to={`/product/${order.orderItems[0]?.product}`} className="text-[11px] font-bold tracking-[0.15em] text-[#101828] uppercase hover:text-[#c9a84c] transition-colors">
                     View Product
                   </Link>

@@ -5,10 +5,15 @@ const Cart = require("../models/Cart");
 const fs = require("fs");
 const path = require("path");
 const dotenv = require("dotenv");
-const Stripe = require("stripe");
+const Razorpay = require("razorpay");
+const crypto = require("crypto");
 
-let globalStripeKey = process.env.STRIPE_SECRET_KEY || "sk_test_placeholder";
-let stripe = new Stripe(globalStripeKey);
+let globalRazorpayKeyId = process.env.RAZORPAY_KEY_ID || "rzp_test_placeholder";
+let globalRazorpayKeySecret = process.env.RAZORPAY_KEY_SECRET || "secret_placeholder";
+let razorpay = new Razorpay({
+  key_id: globalRazorpayKeyId,
+  key_secret: globalRazorpayKeySecret,
+});
 
 
 
@@ -100,6 +105,32 @@ const payCheckout = async (req, res) => {
       return res.status(400).json({
         message: "Payment not successful"
       });
+    }
+
+    // 3.5️⃣ Verify Razorpay Signature if payment method is Razorpay
+    if (checkout.paymentMethod === "Razorpay" && paymentDetails && paymentDetails.razorpay_signature) {
+      const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = paymentDetails;
+      
+      const envPath = path.resolve(__dirname, "../.env");
+      let activeSecret = process.env.RAZORPAY_KEY_SECRET || "secret_placeholder";
+      if (fs.existsSync(envPath)) {
+        const envConfig = dotenv.parse(fs.readFileSync(envPath));
+        if (envConfig.RAZORPAY_KEY_SECRET && envConfig.RAZORPAY_KEY_SECRET !== "secret_placeholder") {
+          activeSecret = envConfig.RAZORPAY_KEY_SECRET;
+        }
+      }
+
+      if (activeSecret !== "secret_placeholder") {
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
+          .createHmac("sha256", activeSecret)
+          .update(body.toString())
+          .digest("hex");
+
+        if (expectedSignature !== razorpay_signature) {
+          return res.status(400).json({ message: "Invalid payment signature" });
+        }
+      }
     }
 
     // 4️⃣ Update checkout payment fields
@@ -210,9 +241,9 @@ const getCheckoutById = async (req, res) => {
   }
 };
 
-const createCheckoutSession = async (req, res) => {
+const createRazorpayOrder = async (req, res) => {
   try {
-    const { checkoutId, requestedMethod } = req.body;
+    const { checkoutId } = req.body;
     
     const checkout = await Checkout.findById(checkoutId);
     
@@ -221,44 +252,47 @@ const createCheckoutSession = async (req, res) => {
     }
 
     // Safely load the key from .env file or process.env
-    let activeKey = globalStripeKey;
+    let activeKeyId = globalRazorpayKeyId;
+    let activeKeySecret = globalRazorpayKeySecret;
     try {
       const envPath = path.resolve(__dirname, "../.env");
       if (fs.existsSync(envPath)) {
         const envConfig = dotenv.parse(fs.readFileSync(envPath));
-        if (envConfig.STRIPE_SECRET_KEY && envConfig.STRIPE_SECRET_KEY !== "sk_test_placeholder") {
-          activeKey = envConfig.STRIPE_SECRET_KEY;
-          stripe = new Stripe(activeKey);
+        if (envConfig.RAZORPAY_KEY_ID && envConfig.RAZORPAY_KEY_ID !== "rzp_test_placeholder") {
+          activeKeyId = envConfig.RAZORPAY_KEY_ID;
+          activeKeySecret = envConfig.RAZORPAY_KEY_SECRET;
+          razorpay = new Razorpay({
+            key_id: activeKeyId,
+            key_secret: activeKeySecret,
+          });
         }
       }
     } catch (e) {
       console.error("Error reading .env dynamically:", e);
     }
 
-    // Bypass Stripe if no valid key is provided
-    if (!activeKey || activeKey === "sk_test_placeholder" || activeKey.includes("placeholder")) {
+    // Bypass Razorpay if no valid key is provided
+    if (!activeKeyId || activeKeyId === "rzp_test_placeholder" || activeKeyId.includes("placeholder")) {
       return res.status(200).json({
-        clientSecret: "dummy_secret_for_testing"
+        id: "order_dummy_for_testing",
+        amount: Math.round(checkout.totalPrice * 100),
+        currency: "INR",
       });
     }
 
-    // Create a payment intent strictly locked to the user's requested method
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(checkout.totalPrice * 100),
-      currency: "inr",
-      payment_method_types: [requestedMethod || "card"],
-      metadata: {
-        checkoutId: checkout._id.toString()
-      }
-    });
+    const options = {
+      amount: Math.round(checkout.totalPrice * 100), // amount in smallest currency unit
+      currency: "INR",
+      receipt: `receipt_order_${checkout._id}`,
+    };
 
-    res.status(200).json({
-      clientSecret: paymentIntent.client_secret,
-    });
+    const order = await razorpay.orders.create(options);
+
+    res.status(200).json(order);
   } catch (error) {
-    console.error("Stripe Error:", error);
+    console.error("Razorpay Error:", error);
     res.status(500).json({ message: error.message || "Server Error" });
   }
 };
 
-module.exports = { createCheckout, payCheckout, finalizeCheckout, getCheckoutById, createCheckoutSession };
+module.exports = { createCheckout, payCheckout, finalizeCheckout, getCheckoutById, createRazorpayOrder };

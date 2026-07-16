@@ -54,6 +54,23 @@ export const loginUser = createAsyncThunk(
   }
 )
 
+export const googleLoginUser = createAsyncThunk(
+  'auth/googleLogin',
+  async (token, thunkAPI) => {
+    try {
+      const response = await axios.post('/api/v3/user/google', { token })
+      // Retrieve local cart and merge
+      const localCart = JSON.parse(localStorage.getItem('guestCart')) || []
+      if(localCart.length > 0) {
+        thunkAPI.dispatch(mergeCartAfterAuth(localCart))
+      }
+      return response.data
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || "Google Login Failed")
+    }
+  }
+)
+
 export const loadUser = createAsyncThunk(
   'auth/loadUser',
   async (_, thunkAPI) => {
@@ -103,6 +120,17 @@ const authSlice = createSlice({
         state.error = null
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      .addCase(googleLoginUser.pending, (state) => { state.loading = true })
+      .addCase(googleLoginUser.fulfilled, (state, action) => {
+        state.loading = false
+        state.isAuthenticated = true
+        state.user = action.payload.user || action.payload
+        state.error = null
+      })
+      .addCase(googleLoginUser.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
       })

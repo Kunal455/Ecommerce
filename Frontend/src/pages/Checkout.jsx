@@ -1,73 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearGuestCart } from '../redux/slices/cartSlice';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
-
-const CheckoutForm = ({ clientSecret, checkoutId, onSuccess }) => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [message, setMessage] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
-
-    setIsLoading(true);
-
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: window.location.href, // Strictly required for UPI
-      },
-      redirect: "if_required", 
-    });
-
-    if (error) {
-      setMessage(error.message);
-      setIsLoading(false);
-    } else if (paymentIntent && paymentIntent.status === "succeeded") {
-      try {
-        await axios.put(`/api/v3/checkout/${checkoutId}/pay`, {
-          paymentStatus: "paid",
-          paymentDetails: paymentIntent
-        }, { withCredentials: true });
-
-        await axios.post(`/api/v3/checkout/${checkoutId}/finalize`, {}, { withCredentials: true });
-
-        onSuccess();
-      } catch (err) {
-        console.error("Error finalizing:", err);
-        setMessage("Payment succeeded but order finalization failed.");
-      }
-      setIsLoading(false);
-    } else {
-      // In case it's 'requires_action' or stuck, release the loading state so they aren't stuck on "Processing"
-      setMessage("Please complete the payment in the Stripe popup or your UPI app.");
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement id="payment-element" />
-      <button 
-        disabled={isLoading || !stripe || !elements} 
-        id="submit"
-        className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 shadow-md"
-      >
-        <span id="button-text">
-          {isLoading ? "Processing..." : "Pay now"}
-        </span>
-      </button>
-      {message && <div id="payment-message" className="text-red-500 text-center mt-4 bg-red-50 p-3 rounded-md border border-red-100">{message}</div>}
-    </form>
-  );
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => {
+      resolve(true);
+    };
+    script.onerror = () => {
+      resolve(false);
+    };
+    document.body.appendChild(script);
+  });
 };
 
 const Checkout = () => {
@@ -130,19 +78,18 @@ const Checkout = () => {
           postalCode: address.postalCode,
           country: address.country
         },
-        paymentMethod: selectedPaymentMethod === "cod" ? "Cash on Delivery" : "Stripe"
+        paymentMethod: selectedPaymentMethod === "cod" ? "Cash on Delivery" : "Razorpay"
       }, { withCredentials: true });
 
       const newCheckoutId = checkoutRes.data.checkout._id;
       setCheckoutId(newCheckoutId);
 
       if (selectedPaymentMethod !== "cod") {
-        const secretRes = await axios.post('/api/v3/checkout/create-checkout-session', {
+        const secretRes = await axios.post('/api/v3/checkout/create-razorpay-order', {
           checkoutId: newCheckoutId,
-          requestedMethod: selectedPaymentMethod // "card" or "upi"
         }, { withCredentials: true });
 
-        setClientSecret(secretRes.data.clientSecret);
+        setClientSecret(secretRes.data);
       }
       
       setStep(3);
@@ -318,13 +265,13 @@ const Checkout = () => {
               ) : clientSecret ? (
                 <>
                   <h3 className="text-xl font-semibold text-gray-800 mb-6">Payment Details</h3>
-                  {clientSecret === "dummy_secret_for_testing" ? (
+                  {clientSecret.id === "order_dummy_for_testing" ? (
                     <div className="bg-yellow-50 p-6 border border-yellow-200 rounded-xl text-center shadow-sm">
                       <div className="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                       </div>
                       <h4 className="text-lg font-bold text-yellow-800 mb-2">Test Mode Active</h4>
-                      <p className="text-sm text-yellow-700 mb-6">Stripe keys are not configured. You can simulate a successful payment below to test the order creation workflow.</p>
+                      <p className="text-sm text-yellow-700 mb-6">Razorpay keys are not configured. You can simulate a successful payment below to test the order creation workflow.</p>
                       <button 
                         disabled={isProcessing}
                         onClick={async () => {
@@ -332,7 +279,7 @@ const Checkout = () => {
                           try {
                             await axios.put(`/api/v3/checkout/${checkoutId}/pay`, {
                               paymentStatus: "paid",
-                              paymentDetails: { id: "simulated_payment_id" }
+                              paymentDetails: { razorpay_payment_id: "simulated_payment_id", razorpay_order_id: "order_dummy", razorpay_signature: "dummy_sig" }
                             }, { withCredentials: true });
                             await axios.post(`/api/v3/checkout/${checkoutId}/finalize`, {}, { withCredentials: true });
                             handleSuccess();
@@ -348,9 +295,66 @@ const Checkout = () => {
                       </button>
                     </div>
                   ) : (
-                    <Elements options={{ clientSecret, appearance: { theme: 'stripe', variables: { colorPrimary: '#000', borderRadius: '12px' } } }} stripe={stripePromise}>
-                      <CheckoutForm clientSecret={clientSecret} checkoutId={checkoutId} onSuccess={handleSuccess} />
-                    </Elements>
+                    <div className="text-center p-8 border border-gray-200 rounded-2xl bg-gray-50">
+                      <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">Complete Your Payment</h3>
+                      <p className="text-gray-500 mb-8 max-w-md mx-auto">You will be redirected to Razorpay securely to complete your payment.</p>
+                      
+                      <button 
+                        disabled={isProcessing}
+                        onClick={async () => {
+                          setIsProcessing(true);
+                          const res = await loadRazorpayScript();
+                          if (!res) {
+                            alert("Razorpay SDK failed to load. Are you online?");
+                            setIsProcessing(false);
+                            return;
+                          }
+
+                          const options = {
+                            key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_placeholder",
+                            amount: clientSecret.amount,
+                            currency: clientSecret.currency,
+                            name: "Ecommerce Store",
+                            description: "Order Payment",
+                            order_id: clientSecret.id,
+                            handler: async function (response) {
+                              try {
+                                await axios.put(`/api/v3/checkout/${checkoutId}/pay`, {
+                                  paymentStatus: "paid",
+                                  paymentDetails: response
+                                }, { withCredentials: true });
+                        
+                                await axios.post(`/api/v3/checkout/${checkoutId}/finalize`, {}, { withCredentials: true });
+                        
+                                handleSuccess();
+                              } catch (err) {
+                                console.error("Error finalizing:", err);
+                                alert("Payment succeeded but order finalization failed.");
+                              }
+                            },
+                            prefill: {
+                              name: address.name,
+                              contact: "",
+                            },
+                            theme: {
+                              color: "#000000",
+                            },
+                          };
+                          const paymentObject = new window.Razorpay(options);
+                          paymentObject.on('payment.failed', function (response){
+                              alert(response.error.description);
+                          });
+                          paymentObject.open();
+                          setIsProcessing(false);
+                        }}
+                        className="w-full max-w-md mx-auto bg-blue-600 text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-50 flex justify-center items-center"
+                      >
+                        {isProcessing ? "Processing..." : "Pay with Razorpay"}
+                      </button>
+                    </div>
                   )}
                 </>
               ) : (
