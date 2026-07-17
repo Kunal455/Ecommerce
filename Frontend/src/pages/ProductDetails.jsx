@@ -283,7 +283,14 @@ const ProductDetails = () => {
                   </button>
                   <span className="flex-1 text-center font-bold text-[#101828] text-sm">{quantity}</span>
                   <button 
-                    onClick={() => setQuantity(Math.min(product.countInStock || 10, quantity + 1))}
+                    onClick={() => {
+                      const maxStock = product.countInStock !== undefined ? product.countInStock : 10;
+                      if (quantity >= maxStock) {
+                        alert("Not in stock");
+                      } else {
+                        setQuantity(quantity + 1);
+                      }
+                    }}
                     className="w-10 h-full flex items-center justify-center text-gray-500 hover:text-[#101828] hover:bg-gray-50 transition-colors"
                   >
                     <Plus size={16} />
