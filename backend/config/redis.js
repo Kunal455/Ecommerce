@@ -1,27 +1,22 @@
-const { createClient } = require('redis');
+const { Redis } = require('@upstash/redis');
 
 let redisClient;
 let isRedisConnected = false;
 
 const initRedis = async () => {
-  redisClient = createClient({
-    url: process.env.REDIS_URL || 'redis://localhost:6379'
-  });
-
-  redisClient.on('error', (err) => {
-    console.error('Redis Client Error:', err);
-    isRedisConnected = false;
-  });
-
-  redisClient.on('connect', () => {
-    console.log('Redis Client Connected'.bgGreen);
-    isRedisConnected = true;
-  });
-
   try {
-    await redisClient.connect();
+    redisClient = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL || 'https://upstash.io',
+      token: process.env.UPSTASH_REDIS_REST_TOKEN || 'gQAAAAAAAoGkAAIgcDE1YTY2YjlmNTY1YjY0ZGVkOWYwNTY2NzNjMGY1OGNlZQ',
+    });
+
+    // Test the connection by running a simple GET command
+    await redisClient.get('test_connection');
+    console.log('Upstash Redis Client Connected'.bgGreen);
+    isRedisConnected = true;
   } catch (error) {
-    console.error('Failed to connect to Redis. Caching will be bypassed.'.bgRed);
+    console.error('Failed to connect to Upstash Redis. Caching will be bypassed.'.bgRed, error);
+    isRedisConnected = false;
   }
 };
 

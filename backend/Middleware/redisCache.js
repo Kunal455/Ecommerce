@@ -25,7 +25,7 @@ const cacheFilters = (duration = 3600) => {
       const originalJson = res.json;
       res.json = function (body) {
         // Store in Redis with expiration
-        redisClient.setEx(key, duration, JSON.stringify(body))
+        redisClient.set(key, JSON.stringify(body), { ex: duration })
           .catch(err => console.error('Redis caching error:', err));
         
         // Call the original res.json

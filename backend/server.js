@@ -55,7 +55,7 @@ app.use("/api/v3", subscriberRoutes);
 app.use("/api/v3/admin/users", adminRoutes);
 app.use("/api/v3/admin/products", adminProductRoutes);
 app.use("/api/v3/admin/orders", adminOrderRoute);
-const PORT = 8000;
+const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`.bgBlue);
 });
