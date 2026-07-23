@@ -97,6 +97,7 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null
       state.isAuthenticated = false
+      localStorage.removeItem('token')
     }
   },
   extraReducers: (builder) => {
@@ -106,6 +107,7 @@ const authSlice = createSlice({
         state.loading = false
         state.isAuthenticated = true
         state.user = action.payload.user || action.payload
+        if (action.payload.token) localStorage.setItem('token', action.payload.token)
         state.error = null
       })
       .addCase(registerUser.rejected, (state, action) => {
@@ -117,6 +119,7 @@ const authSlice = createSlice({
         state.loading = false
         state.isAuthenticated = true
         state.user = action.payload.user || action.payload
+        if (action.payload.token) localStorage.setItem('token', action.payload.token)
         state.error = null
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -128,6 +131,7 @@ const authSlice = createSlice({
         state.loading = false
         state.isAuthenticated = true
         state.user = action.payload.user || action.payload
+        if (action.payload.token) localStorage.setItem('token', action.payload.token)
         state.error = null
       })
       .addCase(googleLoginUser.rejected, (state, action) => {
@@ -145,6 +149,7 @@ const authSlice = createSlice({
         state.loading = false
         state.isAuthenticated = false
         state.user = null
+        localStorage.removeItem('token')
       })
   }
 })
