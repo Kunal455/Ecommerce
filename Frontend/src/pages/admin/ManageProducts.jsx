@@ -135,8 +135,8 @@ const ManageProducts = () => {
                         {product.gender && <span className="block text-xs text-gray-400 mt-0.5">{product.gender}</span>}
                       </td>
                       <td className="p-4 font-bold text-[#101828]">
-                        ${product.price}
-                        {product.discountPrice > 0 && <span className="block text-xs text-green-600 mt-0.5 font-medium">Sale: ${product.discountPrice}</span>}
+                        ₹{product.price}
+                        {product.discountPrice > 0 && <span className="block text-xs text-green-600 mt-0.5 font-medium">Sale: ₹{product.discountPrice}</span>}
                       </td>
                       <td className="p-4">
                         <span className={`px-2.5 py-1 rounded-sm text-[11px] font-bold ${

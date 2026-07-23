@@ -35,7 +35,7 @@ const ManageOrders = () => {
 
   const filteredOrders = orders?.filter(o => 
     o._id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (o.shippingAddress?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
+    (o.user?.name || o.shippingAddress?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   const getStatusBadge = (status) => {
@@ -129,13 +129,13 @@ const ManageOrders = () => {
                         </button>
                       </td>
                       <td className="p-4">
-                        <div className="text-[#101828] font-medium">{order.shippingAddress?.name || 'N/A'}</div>
+                        <div className="text-[#101828] font-medium">{order.user?.name || order.shippingAddress?.name || 'N/A'}</div>
                         <div className="text-xs text-gray-500 mt-0.5">{order.orderItems?.length || 0} items</div>
                       </td>
                       <td className="p-4 text-gray-500">
                         {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </td>
-                      <td className="p-4 font-bold text-[#101828]">${order.totalPrice.toFixed(2)}</td>
+                      <td className="p-4 font-bold text-[#101828]">₹{order.totalPrice?.toFixed(2) || '0.00'}</td>
                       <td className="p-4">
                         <select
                           value={order.status}
@@ -198,7 +198,7 @@ const ManageOrders = () => {
               <div>
                 <h3 className="text-sm font-bold text-[#101828] uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Shipping Information</h3>
                 <div className="text-sm text-gray-600 space-y-1">
-                  <p className="font-medium text-[#101828]">{selectedOrder.shippingAddress?.name}</p>
+                  <p className="font-medium text-[#101828]">{selectedOrder.user?.name || selectedOrder.shippingAddress?.name || 'N/A'}</p>
                   <p>{selectedOrder.shippingAddress?.address}</p>
                   <p>{selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.postalCode}</p>
                   <p>{selectedOrder.shippingAddress?.country}</p>
@@ -219,7 +219,7 @@ const ManageOrders = () => {
                         <p className="text-xs text-gray-500 mt-1">Size: {item.size} | Color: {item.color}</p>
                         <p className="text-xs text-gray-500 mt-1">Qty: {item.quantity}</p>
                       </div>
-                      <div className="font-bold text-[#c9a84c]">${item.price.toFixed(2)}</div>
+                      <div className="font-bold text-[#c9a84c]">₹{item.price.toFixed(2)}</div>
                     </div>
                   ))}
                 </div>
@@ -230,7 +230,7 @@ const ManageOrders = () => {
                 <h3 className="text-sm font-bold text-[#101828] uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Payment Summary</h3>
                 <div className="flex justify-between items-center text-sm mb-2">
                   <span className="text-gray-500">Subtotal</span>
-                  <span className="font-medium text-[#101828]">${selectedOrder.totalPrice.toFixed(2)}</span>
+                  <span className="font-medium text-[#101828]">₹{selectedOrder.totalPrice?.toFixed(2) || '0.00'}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm mb-2">
                   <span className="text-gray-500">Shipping</span>
@@ -238,7 +238,7 @@ const ManageOrders = () => {
                 </div>
                 <div className="flex justify-between items-center text-sm pt-4 border-t border-gray-100 mt-4">
                   <span className="font-bold text-[#101828] uppercase">Total</span>
-                  <span className="font-serif text-xl font-bold text-[#c9a84c]">${selectedOrder.totalPrice.toFixed(2)}</span>
+                  <span className="font-serif text-xl font-bold text-[#c9a84c]">₹{selectedOrder.totalPrice?.toFixed(2) || '0.00'}</span>
                 </div>
               </div>
 

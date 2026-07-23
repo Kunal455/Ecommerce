@@ -113,11 +113,11 @@ const AddProductModal = ({ isOpen, onClose }) => {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[11px] font-bold tracking-[0.15em] text-gray-500 uppercase mb-2">Price ($) *</label>
+                    <label className="block text-[11px] font-bold tracking-[0.15em] text-gray-500 uppercase mb-2">Price (₹) *</label>
                     <input type="number" name="price" required value={formData.price} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-[#c9a84c] outline-none text-sm" placeholder="0.00" />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold tracking-[0.15em] text-gray-500 uppercase mb-2">Discount ($)</label>
+                    <label className="block text-[11px] font-bold tracking-[0.15em] text-gray-500 uppercase mb-2">Discount (₹)</label>
                     <input type="number" name="discountPrice" value={formData.discountPrice} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-[#c9a84c] outline-none text-sm" placeholder="0.00" />
                   </div>
                 </div>

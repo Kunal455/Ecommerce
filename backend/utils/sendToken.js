@@ -19,7 +19,8 @@ const sendToken = (user, res, statusCode) => {
     token, // 👈 NOW YOU GET TOKEN
     user: {
       _id: user._id,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       role: user.role
     }

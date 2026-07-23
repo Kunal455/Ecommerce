@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { registerUser } from '../redux/slices/authSlice'
+import toast from 'react-hot-toast'
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -23,7 +24,12 @@ const Signup = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     dispatch(registerUser(formData)).then((action) => {
-      if(!action.error) navigate('/')
+      if(!action.error) {
+        toast.success("Account created successfully!");
+        navigate('/');
+      } else {
+        toast.error(action.payload?.message || action.payload || "Failed to create account");
+      }
     })
   }
 

@@ -5,6 +5,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { loginUser, googleLoginUser } from '../redux/slices/authSlice'
 import { useGoogleLogin } from '@react-oauth/google'
+import toast from 'react-hot-toast'
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -15,10 +16,18 @@ const Login = () => {
   const googleLogin = useGoogleLogin({
     onSuccess: (tokenResponse) => {
       dispatch(googleLoginUser(tokenResponse.credential || tokenResponse.access_token)).then((action) => {
-        if(!action.error) navigate('/')
+        if(!action.error) {
+          toast.success("Logged in successfully!");
+          navigate('/');
+        } else {
+          toast.error(action.payload?.message || action.payload || "Google login failed");
+        }
       })
     },
-    onError: () => console.log('Google Login Failed'),
+    onError: () => {
+      console.log('Google Login Failed');
+      toast.error("Google Login Failed");
+    },
   })
 
   const [formData, setFormData] = useState({ email: '', password: '' })
@@ -26,7 +35,12 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     dispatch(loginUser(formData)).then((action) => {
-      if(!action.error) navigate('/')
+      if(!action.error) {
+        toast.success("Logged in successfully!");
+        navigate('/');
+      } else {
+        toast.error(action.payload?.message || action.payload || "Invalid credentials");
+      }
     })
   }
 

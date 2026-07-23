@@ -42,6 +42,9 @@ const updateOrderStatus = async (req, res) => {
     }
 
     const updatedOrder = await order.save();
+    
+    // Populate user before sending back so frontend has the user details
+    await updatedOrder.populate("user", "name email");
 
     res.status(200).json({
       message: "Order updated successfully",

@@ -111,7 +111,7 @@ const AdminDashboard = () => {
             <div>
               <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Total Sales</p>
               <h3 className="text-3xl font-bold text-[#101828]">
-                {ordersLoading ? '...' : `$${totalSales.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
+                {ordersLoading ? '...' : `₹${totalSales.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
               </h3>
               <p className="text-xs text-gray-400 font-medium mt-2 flex items-center">
                 Across all time
@@ -188,7 +188,7 @@ const AdminDashboard = () => {
                       <td className="p-4 text-gray-500">
                         {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </td>
-                      <td className="p-4 font-medium text-[#101828]">${order.totalPrice.toFixed(2)}</td>
+                      <td className="p-4 font-medium text-[#101828]">₹{order.totalPrice?.toFixed(2) || '0.00'}</td>
                       <td className="p-4">
                         <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getStatusStyle(order.status)}`}>
                           {order.status}
