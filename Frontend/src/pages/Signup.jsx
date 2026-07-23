@@ -77,8 +77,8 @@ const Signup = () => {
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex gap-4">
-            <div className="w-1/2">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="w-full sm:w-1/2">
               <label className="block text-[10px] font-bold tracking-[0.15em] text-gray-500 uppercase mb-2">First Name</label>
               <input 
                 type="text" 
@@ -89,7 +89,7 @@ const Signup = () => {
                 onChange={(e) => setFormData({...formData, firstName: e.target.value})}
               />
             </div>
-            <div className="w-1/2">
+            <div className="w-full sm:w-1/2">
               <label className="block text-[10px] font-bold tracking-[0.15em] text-gray-500 uppercase mb-2">Last Name</label>
               <input 
                 type="text" 
