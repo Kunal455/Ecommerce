@@ -66,7 +66,7 @@ const Login = () => {
         {/* Form */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 text-[#c14a4a] text-[12px] font-bold tracking-wide">
-            {error.message || error || "Failed to sign in. Please check your credentials."}
+            {error?.message || error?.error || (typeof error === 'string' ? error : "Failed to sign in. Please check your credentials.")}
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-6">
