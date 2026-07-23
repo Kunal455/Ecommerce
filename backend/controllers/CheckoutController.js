@@ -8,8 +8,8 @@ const dotenv = require("dotenv");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 
-let globalRazorpayKeyId = process.env.RAZORPAY_KEY_ID || "rzp_test_placeholder";
-let globalRazorpayKeySecret = process.env.RAZORPAY_KEY_SECRET || "secret_placeholder";
+let globalRazorpayKeyId = process.env.RAZORPAY_KEY_ID;
+let globalRazorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
 let razorpay = new Razorpay({
   key_id: globalRazorpayKeyId,
   key_secret: globalRazorpayKeySecret,

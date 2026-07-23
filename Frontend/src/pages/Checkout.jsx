@@ -314,7 +314,7 @@ const Checkout = () => {
                           }
 
                           const options = {
-                            key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_placeholder",
+                            key: import.meta.env.VITE_RAZORPAY_KEY_ID,
                             amount: clientSecret.amount,
                             currency: clientSecret.currency,
                             name: "Ecommerce Store",
