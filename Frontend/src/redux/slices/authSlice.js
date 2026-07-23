@@ -87,6 +87,7 @@ const initialState = {
   user: null,
   isAuthenticated: false,
   loading: false,
+  isInitialized: false,
   error: null
 }
 
@@ -141,12 +142,14 @@ const authSlice = createSlice({
       .addCase(loadUser.pending, (state) => { state.loading = true })
       .addCase(loadUser.fulfilled, (state, action) => {
         state.loading = false
+        state.isInitialized = true
         state.isAuthenticated = true
         state.user = action.payload.user || action.payload
         state.error = null
       })
       .addCase(loadUser.rejected, (state, action) => {
         state.loading = false
+        state.isInitialized = true
         state.isAuthenticated = false
         state.user = null
         localStorage.removeItem('token')
