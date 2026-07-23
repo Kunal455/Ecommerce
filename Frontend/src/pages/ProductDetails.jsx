@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToGuestCart, addToCartBackend } from '../redux/slices/cartSlice';
 import ProductCard from '../components/ProductCard';
 import { ChevronRight, Minus, Plus, ShoppingBag, Truck, RotateCcw, ShieldCheck } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const COLOR_MAP = {
   'Black': { hex: '#000000' },
@@ -104,12 +105,14 @@ const ProductDetails = () => {
       
       // Use React state for success feedback
       setAddedSuccess(true);
+      toast.success("Added to bag successfully!");
       setTimeout(() => {
         setAddedSuccess(false);
       }, 2000);
     } catch (error) {
       console.error("Failed to add to cart:", error);
-      alert("Failed to add to cart. Please try again.");
+      const errorMsg = error?.message || error || "Failed to add to cart. Please try again.";
+      toast.error(typeof errorMsg === 'string' ? errorMsg : "Failed to add to cart");
     } finally {
       setAddingToCart(false);
     }
