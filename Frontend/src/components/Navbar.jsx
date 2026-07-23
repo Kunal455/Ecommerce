@@ -43,27 +43,27 @@ const Navbar = () => {
     <>
       <header className="w-full flex flex-col font-sans relative z-30 shadow-sm">
         {/* Top Banner */}
-        <div className="bg-[#1a2b4c] text-[#d4af37] text-[11px] sm:text-xs font-bold text-center py-2.5 tracking-[0.2em] uppercase flex items-center justify-center gap-2">
-          <span>✦</span>
-          <span>MIN 50% OFF ON THOUSANDS OF STYLES | CODE: RQB50 | FREE DELIVERY ABOVE ₹2,999</span>
+        <div className="bg-[#1a2b4c] text-[#d4af37] text-[9px] sm:text-xs font-bold text-center py-2.5 tracking-[0.1em] sm:tracking-[0.2em] uppercase flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2">
+          <span className="hidden sm:inline">✦</span>
+          <span className="text-center">MIN 50% OFF ON THOUSANDS OF STYLES | CODE: RQB50 | FREE DELIVERY ABOVE ₹2,999</span>
         </div>
 
         {/* Main Navbar */}
         <div className="bg-[#f9fafb] border-b border-[#e5e7eb] relative">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-[88px] gap-8">
+            <div className="flex justify-between items-center h-[88px] gap-4">
               
               {/* Logo */}
               <div className="flex-shrink-0 flex items-center">
-                <Link to="/" className="flex items-center gap-3">
+                <Link to="/" className="flex items-center gap-2 sm:gap-3">
                   <img 
                     src="/logo.png" 
                     alt="Raqeeba Badge" 
-                    className="h-16 w-auto object-contain mix-blend-multiply"
+                    className="h-10 sm:h-16 w-auto object-contain mix-blend-multiply"
                   />
                   <div className="flex flex-col justify-center pt-1">
-                    <span className="font-serif text-[28px] text-[#0f2040] leading-none tracking-widest font-semibold">RAQEEBA</span>
-                    <span className="text-[10px] text-[#c9a84c] tracking-[0.35em] font-bold mt-1 uppercase">The Trend Breaker</span>
+                    <span className="font-serif text-[20px] sm:text-[28px] text-[#0f2040] leading-none tracking-widest font-semibold">RAQEEBA</span>
+                    <span className="text-[7px] sm:text-[10px] text-[#c9a84c] tracking-[0.2em] sm:tracking-[0.35em] font-bold mt-1 uppercase">The Trend Breaker</span>
                   </div>
                 </Link>
               </div>
@@ -99,7 +99,7 @@ const Navbar = () => {
               </div>
 
               {/* Icons */}
-              <div className="flex items-center gap-10 w-72 justify-end">
+              <div className="flex items-center gap-4 sm:gap-10 w-auto sm:w-72 justify-end">
                 
                 {/* Profile Drawer Button */}
                 <button 
@@ -139,14 +139,14 @@ const Navbar = () => {
         {/* Bottom Marquee Banner */}
         {!isAuthPage && (
           <div className="bg-[#f9fafb] border-b border-gray-200 overflow-hidden">
-            <div className="max-w-[1400px] mx-auto px-4 py-2.5 flex justify-between items-center text-[10px] sm:text-xs font-bold tracking-[0.2em] text-[#1a2b4c] uppercase">
-              <span>COLLECTION NOW LIVE</span>
-              <span className="text-[#d4af37]">●</span>
+            <div className="max-w-[1400px] mx-auto px-4 py-2.5 flex justify-center sm:justify-between items-center text-[10px] sm:text-xs font-bold tracking-[0.2em] text-[#1a2b4c] uppercase flex-wrap gap-2">
+              <span className="hidden md:inline">COLLECTION NOW LIVE</span>
+              <span className="hidden md:inline text-[#d4af37]">●</span>
               <span>FREE SHIPPING ABOVE ₹2,999</span>
-              <span className="text-[#d4af37]">●</span>
-              <span>MEMBERS GET 10% OFF</span>
-              <span className="text-[#d4af37]">●</span>
-              <span>BREAK EVERY TREND</span>
+              <span className="hidden sm:inline text-[#d4af37]">●</span>
+              <span className="hidden sm:inline">MEMBERS GET 10% OFF</span>
+              <span className="hidden lg:inline text-[#d4af37]">●</span>
+              <span className="hidden lg:inline">BREAK EVERY TREND</span>
             </div>
           </div>
         )}
