@@ -41,7 +41,7 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="w-full flex flex-col font-sans relative z-30 shadow-sm">
+      <header className="w-full flex flex-col font-sans sticky top-0 z-50 shadow-sm bg-white">
         {/* Top Banner */}
         <div className="bg-[#1a2b4c] text-[#d4af37] text-[9px] sm:text-xs font-bold text-center py-2.5 tracking-[0.1em] sm:tracking-[0.2em] uppercase flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2">
           <span className="hidden sm:inline">✦</span>
