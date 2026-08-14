@@ -42,6 +42,7 @@ const Footer = () => {
             <p className="text-sm text-gray-400 leading-relaxed mt-4 mb-6">
               India's boldest family fashion destination. Trend-breaking styles for every generation.
             </p>
+            <div className="flex items-center gap-4">
               <a href="https://www.instagram.com/vermakunal_01/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 flex items-center justify-center text-white hover:opacity-80 transition-opacity shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
