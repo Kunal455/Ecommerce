@@ -120,8 +120,8 @@ const HeroCarousel = () => {
               />
               {/* Mobile overlay for text readability */}
               <div className="absolute inset-0 bg-[#1a2b4c]/70 lg:hidden"></div>
-              {/* Desktop smooth gradient mask (Solid Left -> Transparent Right) */}
-              <div className="absolute inset-0 hidden lg:block bg-gradient-to-r from-[#1a2b4c] from-0% via-[#1a2b4c] via-40% to-transparent to-100%"></div>
+              {/* Desktop smooth gradient mask (Semi-transparent Left -> Transparent Right) */}
+              <div className="absolute inset-0 hidden lg:block bg-gradient-to-r from-[#1a2b4c]/80 from-0% via-[#1a2b4c]/40 via-50% to-transparent to-100%"></div>
             </div>
 
             {/* Content Layer */}
