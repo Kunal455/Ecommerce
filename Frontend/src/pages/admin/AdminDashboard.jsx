@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Users, Package, ShoppingBag, LayoutDashboard, Settings, LogOut, DollarSign, ArrowUpRight } from 'lucide-react';
+import { Users, Package, ShoppingBag, LayoutDashboard, Settings, LogOut, DollarSign, ArrowUpRight, Image } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice';
 import { getAdminOrders } from '../../redux/slices/adminOrderSlice';
@@ -20,6 +20,7 @@ export const AdminSidebar = () => {
     { name: 'Users', path: '/admin/users', icon: <Users size={20} /> },
     { name: 'Products', path: '/admin/products', icon: <Package size={20} /> },
     { name: 'Orders', path: '/admin/orders', icon: <ShoppingBag size={20} /> },
+    { name: 'Hero Carousel', path: '/admin/hero', icon: <Image size={20} /> },
   ];
 
   return (

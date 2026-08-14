@@ -18,6 +18,7 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import ManageProducts from './pages/admin/ManageProducts'
 import ManageUsers from './pages/admin/ManageUsers'
 import ManageOrders from './pages/admin/ManageOrders'
+import ManageHero from './pages/admin/ManageHero'
 import Profile from './pages/Profile'
 import Orders from './pages/Orders'
 import Cart from './pages/Cart'
@@ -72,6 +73,7 @@ const AppContent = () => {
             <Route path="/admin/users" element={<ManageUsers />} />
             <Route path="/admin/products" element={<ManageProducts />} />
             <Route path="/admin/orders" element={<ManageOrders />} />
+            <Route path="/admin/hero" element={<ManageHero />} />
           </Route>
         </Routes>
       </main>

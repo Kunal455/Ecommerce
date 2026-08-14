@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchSiteConfig } from '../redux/slices/siteConfigSlice';
 
-const slides = [
+const fallbackSlides = [
   {
     id: 1,
     subtitle: 'NEW SEASON 2026',
@@ -55,8 +57,17 @@ const slides = [
 ];
 
 const HeroCarousel = () => {
+  const dispatch = useDispatch();
+  const { config } = useSelector((state) => state.siteConfig);
+  
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchSiteConfig());
+  }, [dispatch]);
+
+  const activeSlides = config?.heroSlides?.length > 0 ? config.heroSlides : fallbackSlides;
 
   // Auto-play timer
   useEffect(() => {
@@ -70,14 +81,14 @@ const HeroCarousel = () => {
   const nextSlide = () => {
     if (isAnimating) return;
     setIsAnimating(true);
-    setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+    setCurrent((prev) => (prev === activeSlides.length - 1 ? 0 : prev + 1));
     setTimeout(() => setIsAnimating(false), 800); // Match CSS transition duration
   };
 
   const prevSlide = () => {
     if (isAnimating) return;
     setIsAnimating(true);
-    setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+    setCurrent((prev) => (prev === 0 ? activeSlides.length - 1 : prev - 1));
     setTimeout(() => setIsAnimating(false), 800);
   };
 
@@ -92,7 +103,7 @@ const HeroCarousel = () => {
     <div className="relative w-full h-[600px] xl:h-[700px] overflow-hidden bg-[#1a2b4c]">
       
       {/* Slides Container */}
-      {slides.map((slide, index) => {
+      {activeSlides.map((slide, index) => {
         const isActive = index === current;
         
         return (
@@ -131,7 +142,12 @@ const HeroCarousel = () => {
                   
                   {/* Title */}
                   <h1 className="font-serif text-[48px] sm:text-[60px] md:text-[72px] text-white leading-[1.05] mb-6">
-                    {slide.title}
+                    {Array.isArray(slide.title) ? slide.title.map((line, i) => (
+                      <React.Fragment key={i}>
+                        {i > 0 && <br />}
+                        {i === 1 ? <span className="italic">{line}</span> : line}
+                      </React.Fragment>
+                    )) : slide.title}
                   </h1>
                   
                   {/* Description */}
@@ -180,7 +196,7 @@ const HeroCarousel = () => {
 
       {/* Dot Indicators */}
       <div className="absolute bottom-8 left-0 right-0 z-30 flex justify-center gap-3">
-        {slides.map((_, index) => (
+        {activeSlides.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}

@@ -14,6 +14,7 @@ const subscriberRoutes = require("./routes/subscriberRoutes");
 const adminRoutes = require("./routes/adminRoute");
 const adminProductRoutes = require("./routes/productAdminRoute");
 const adminOrderRoute = require("./routes/adminOrderRouter");
+const configRoutes = require("./routes/ConfigRoute");
 dotenv.config();
 
 // connect to mongo
@@ -55,6 +56,7 @@ app.use("/api/v3", subscriberRoutes);
 app.use("/api/v3/admin/users", adminRoutes);
 app.use("/api/v3/admin/products", adminProductRoutes);
 app.use("/api/v3/admin/orders", adminOrderRoute);
+app.use("/api/v3/config", configRoutes);
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`.bgBlue);
