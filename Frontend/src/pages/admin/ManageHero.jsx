@@ -184,10 +184,21 @@ const ManageHero = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-1 mt-2">Button Link</label>
                       <input 
                         type="text" 
+                        list={`link-options-${index}`}
                         value={slide.buttons?.[0]?.link || ''} 
                         onChange={(e) => handleButtonChange(index, 0, 'link', e.target.value)}
                         className="w-full border border-gray-300 p-2 rounded"
+                        placeholder="/shop"
                       />
+                      <datalist id={`link-options-${index}`}>
+                        <option value="/shop">All Products</option>
+                        <option value="/men">Men's Collection</option>
+                        <option value="/women">Women's Collection</option>
+                        <option value="/kids">Kids Collection</option>
+                        <option value="/sale">Sale Items</option>
+                        <option value="/new-arrivals">New Arrivals</option>
+                        <option value="/best-sellers">Best Sellers</option>
+                      </datalist>
                     </div>
                   </div>
 
