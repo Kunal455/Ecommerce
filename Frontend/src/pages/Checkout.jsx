@@ -398,7 +398,7 @@ const Checkout = () => {
                         <h4 className="text-sm font-semibold text-gray-900 truncate">{item.name}</h4>
                         <p className="text-xs text-gray-500 mt-1">{item.size} • {item.color}</p>
                       </div>
-                      <div className="text-sm font-bold text-gray-900 whitespace-nowrap">${(item.price * item.quantity).toFixed(2)}</div>
+                      <div className="text-sm font-bold text-gray-900 whitespace-nowrap">₹{(item.price * item.quantity).toFixed(2)}</div>
                     </div>
                   ))}
                 </div>
@@ -406,7 +406,7 @@ const Checkout = () => {
                 <div className="border-t border-gray-100 pt-5 space-y-3">
                   <div className="flex justify-between text-sm text-gray-500 font-medium">
                     <span>Subtotal</span>
-                    <span className="text-gray-900">${cart.products.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0).toFixed(2)}</span>
+                    <span className="text-gray-900">₹{cart.products.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-gray-500 font-medium">
                     <span>Shipping</span>
@@ -414,7 +414,7 @@ const Checkout = () => {
                   </div>
                   <div className="flex justify-between items-center text-xl font-bold text-gray-900 pt-4 border-t border-gray-100 mt-2">
                     <span>Total</span>
-                    <span>${cart.products.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0).toFixed(2)}</span>
+                    <span>₹{cart.products.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0).toFixed(2)}</span>
                   </div>
                 </div>
               </div>

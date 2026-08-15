@@ -12,7 +12,7 @@ mongoose.connect(process.env.MONGO_URL).then(async () => {
                 filter: { _id: p._id },
                 update: {
                     $set: {
-                        price: Math.floor(Math.random() * 5) + 1,
+                        price: Math.floor(Math.random() * 1501) + 500,
                         discountPrice: 0
                     }
                 }
@@ -23,7 +23,7 @@ mongoose.connect(process.env.MONGO_URL).then(async () => {
             await Product.bulkWrite(bulkOps);
         }
         
-        console.log('✅ Successfully updated ' + bulkOps.length + ' products to 1-5 rupees!');
+        console.log('✅ Successfully updated ' + bulkOps.length + ' products to 500-2000 rupees!');
         process.exit(0);
     } catch (err) {
         console.error(err);
