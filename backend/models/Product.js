@@ -146,4 +146,21 @@ const productSchema = new mongoose.Schema(
   }
 );
 
+// High Performance Indexes
+productSchema.index({ 
+  name: 'text', 
+  description: 'text', 
+  category: 'text', 
+  brand: 'text', 
+  gender: 'text', 
+  material: 'text', 
+  collections: 'text' 
+});
+productSchema.index({ category: 1, createdAt: -1 });
+productSchema.index({ brand: 1, createdAt: -1 });
+productSchema.index({ gender: 1, createdAt: -1 });
+productSchema.index({ price: 1 });
+productSchema.index({ rating: -1 });
+productSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model("Product", productSchema);

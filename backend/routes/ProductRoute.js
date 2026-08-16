@@ -5,12 +5,12 @@ const { createProduct, updateProduct, deleteProduct, getProducts, getProductById
 const router = express.Router();
 
 // Public routes
-router.get("/", getProducts)
+router.get("/", cacheFilters(300), getProducts)
 router.get("/filters", cacheFilters(3600), getFilters)
-router.get("/best-sellers", getBestSellers)
-router.get("/new-arrivals", getNewArrivals)
+router.get("/best-sellers", cacheFilters(300), getBestSellers)
+router.get("/new-arrivals", cacheFilters(300), getNewArrivals)
 router.get("/:id", getProductById)
-router.get("/similar/:id", getSimilarProducts)
+router.get("/similar/:id", cacheFilters(300), getSimilarProducts)
 
 // Protected routes (require login but not admin)
 router.post("/", protect, admin, createProduct)

@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const { invalidateProductCache } = require("../Middleware/redisCache");
 
 
 const createProduct = async (req, res) => {
@@ -64,6 +65,7 @@ const createProduct = async (req, res) => {
     });
 
     const createdProduct = await product.save();
+    await invalidateProductCache();
 
     res.status(201).json(createdProduct);
 
@@ -150,6 +152,7 @@ const updateProduct = async (req, res) => {
     product.sku = sku || product.sku;
 
     const updatedProduct = await product.save();
+    await invalidateProductCache();
 
     res.status(200).json({
       message: "Product updated successfully",
@@ -190,6 +193,7 @@ const deleteProduct = async (req, res) => {
 
     
     await product.deleteOne();
+    await invalidateProductCache();
 
     res.status(200).json({ 
       message: "Product deleted successfully",
@@ -234,17 +238,7 @@ const getProducts = async (req, res) => {
 
     // 🔎 Search
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { category: { $regex: search, $options: "i" } },
-        { brand: { $regex: search, $options: "i" } },
-        { gender: { $regex: search, $options: "i" } },
-        { material: { $regex: search, $options: "i" } },
-        { collections: { $regex: search, $options: "i" } },
-        { colors: { $regex: search, $options: "i" } },
-        { sizes: { $regex: search, $options: "i" } }
-      ];
+      query.$text = { $search: search };
     }
 
     if (category) query.category = { $in: category.split(',') };
@@ -271,7 +265,7 @@ const getProducts = async (req, res) => {
 
     // 📄 Pagination
     const pageNumber = Number(page) || 1;
-    const pageSize = Number(limit) || 10;
+    const pageSize = Math.min(Number(limit) || 10, 100); // Enforce maximum of 100 limits per query
     const skip = (pageNumber - 1) * pageSize;
     
     console.log("Query Object:", query);

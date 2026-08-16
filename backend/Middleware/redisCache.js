@@ -18,7 +18,7 @@ const cacheFilters = (duration = 3600) => {
       const cachedData = await redisClient.get(key);
       if (cachedData) {
         // Send cached response
-        return res.status(200).json(JSON.parse(cachedData));
+        return res.status(200).json(typeof cachedData === 'string' ? JSON.parse(cachedData) : cachedData);
       }
 
       // Intercept res.json to cache the response before sending it
@@ -40,4 +40,17 @@ const cacheFilters = (duration = 3600) => {
   };
 };
 
-module.exports = { cacheFilters };
+const invalidateProductCache = async () => {
+  if (!isRedisAvailable()) return;
+  const redisClient = getRedisClient();
+  try {
+    let keys = await redisClient.keys('cache:/api/v3/product*');
+    if (keys.length > 0) {
+      await redisClient.del(...keys);
+    }
+  } catch (error) {
+    console.error('Redis cache invalidation error:', error);
+  }
+};
+
+module.exports = { cacheFilters, invalidateProductCache };

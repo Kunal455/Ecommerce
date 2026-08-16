@@ -10,10 +10,13 @@ const crypto = require("crypto");
 
 let globalRazorpayKeyId = process.env.RAZORPAY_KEY_ID;
 let globalRazorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
-let razorpay = new Razorpay({
-  key_id: globalRazorpayKeyId,
-  key_secret: globalRazorpayKeySecret,
-});
+let razorpay;
+if (globalRazorpayKeyId && globalRazorpayKeyId !== "rzp_test_placeholder") {
+  razorpay = new Razorpay({
+    key_id: globalRazorpayKeyId,
+    key_secret: globalRazorpayKeySecret,
+  });
+}
 
 
 

@@ -36,7 +36,8 @@ app.use(cors({
 }));
 
 app.use((req, res, next) => {
-  console.log(req.method, req.url);
+  // Disabled per-request logging for performance in production
+  // console.log(req.method, req.url);
   next();
 });
 
@@ -58,6 +59,23 @@ app.use("/api/v3/admin/products", adminProductRoutes);
 app.use("/api/v3/admin/orders", adminOrderRoute);
 app.use("/api/v3/config", configRoutes);
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`.bgBlue);
 });
+
+// Graceful shutdown
+const gracefulShutdown = async () => {
+  console.log('Shutting down gracefully...');
+  server.close(async () => {
+    console.log('HTTP server closed.');
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState === 1) {
+      await mongoose.connection.close(false);
+      console.log('MongoDB connection closed.');
+    }
+    process.exit(0);
+  });
+};
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
