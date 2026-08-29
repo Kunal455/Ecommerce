@@ -268,11 +268,35 @@ const getProducts = async (req, res) => {
     const pageSize = Math.min(Number(limit) || 10, 100); // Enforce maximum of 100 limits per query
     const skip = (pageNumber - 1) * pageSize;
     
-    console.log("Query Object:", query);
+    // console.log("Query Object:", query);
+    if (req.perf) req.perf.steps.controller_start = performance.now();
 
+    if (req.perf) req.perf.steps.mongodb_find_start = performance.now();
     const products = await Product.find(query).sort(sortOption).skip(skip).limit(pageSize);
+    if (req.perf) req.perf.steps.mongodb_find = performance.now() - req.perf.steps.mongodb_find_start;
 
+    if (req.perf) req.perf.steps.mongodb_count_start = performance.now();
     const totalProducts = await Product.countDocuments(query);
+    if (req.perf) req.perf.steps.mongodb_count = performance.now() - req.perf.steps.mongodb_count_start;
+
+    if (req.perf) req.perf.steps.controller = performance.now() - req.perf.steps.controller_start;
+
+    if (req.perf && process.env.PERF_LOG === 'true') {
+      const totalDuration = performance.now() - req.perf.start;
+      const threshold = Number(process.env.PERF_SLOW_THRESHOLD) || 0;
+      if (totalDuration >= threshold) {
+        const serverId = process.env.HOSTNAME || process.pid;
+        const redisStr = req.perf.steps.redis_duration !== undefined ? `redis_get=${req.perf.steps.redis_duration.toFixed(2)}ms cache=${req.perf.steps.cache_status}` : 'redis_get=0.00ms cache=BYPASS';
+        console.log(`[PERF] request_start method=${req.method} path=${req.originalUrl || req.url} requestId=${req.requestId}`);
+        console.log(`[PERF] server=${serverId}`);
+        console.log(`[PERF] ${redisStr}`);
+        console.log(`[PERF] mongodb_find=${req.perf.steps.mongodb_find.toFixed(2)}ms`);
+        console.log(`[PERF] mongodb_count=${req.perf.steps.mongodb_count.toFixed(2)}ms`);
+        console.log(`[PERF] controller=${req.perf.steps.controller.toFixed(2)}ms`);
+        console.log(`[PERF] total=${totalDuration.toFixed(2)}ms`);
+        console.log(`[PERF] request_end status=200 total=${totalDuration.toFixed(2)}ms`);
+      }
+    }
 
     res.status(200).json({
       success: true,

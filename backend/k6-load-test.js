@@ -3,7 +3,7 @@ import { check, sleep } from 'k6';
 import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 
 // Configuration
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:8000';
+const BASE_URL = __ENV.BASE_URL || 'http://localhost:8001';
 const TEST_EMAIL = __ENV.TEST_EMAIL || 'testuser@example.com';
 const TEST_PASSWORD = __ENV.TEST_PASSWORD || 'password123';
 

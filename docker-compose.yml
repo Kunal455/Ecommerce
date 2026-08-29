@@ -6,7 +6,7 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - VITE_API_URL=http://localhost:8000
+      - VITE_API_URL=http://localhost:8001
       - CHOKIDAR_USEPOLLING=true
     volumes:
       - ./frontend:/app
@@ -19,11 +19,10 @@ services:
   backend:
     build:
       context: ./backend
-    container_name: ecommerce_backend
-    ports:
-      - "8000:8000"
     environment:
       - REDIS_URL=redis://redis:6379
+      - PERF_LOG=true
+      - PERF_SLOW_THRESHOLD=500
     env_file:
       - ./backend/.env
     volumes:
@@ -33,6 +32,17 @@ services:
       - ecommerce_network
     depends_on:
       - redis
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8001:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+    networks:
+      - ecommerce_network
 
   redis:
     image: redis:alpine

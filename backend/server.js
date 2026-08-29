@@ -35,9 +35,28 @@ app.use(cors({
   credentials: true
 }));
 
+const crypto = require('crypto');
+const SERVER_ID = process.env.HOSTNAME || process.pid;
+
 app.use((req, res, next) => {
-  // Disabled per-request logging for performance in production
-  // console.log(req.method, req.url);
+  if (process.env.PERF_LOG === 'true') {
+    req.requestId = crypto.randomUUID();
+    req.perf = { 
+      start: performance.now(),
+      steps: {}
+    };
+
+    res.on('finish', () => {
+      const totalDuration = performance.now() - req.perf.start;
+      const threshold = Number(process.env.PERF_SLOW_THRESHOLD) || 0;
+      
+      if (totalDuration >= threshold) {
+        const isError = res.statusCode >= 400;
+        const prefix = isError ? '[PERF ERROR]' : '[API PERF]';
+        console.log(`${prefix} ${req.method} ${req.originalUrl || req.url} status=${res.statusCode} duration=${totalDuration.toFixed(2)}ms server=${SERVER_ID} requestId=${req.requestId}`);
+      }
+    });
+  }
   next();
 });
 
@@ -58,7 +77,7 @@ app.use("/api/v3/admin/users", adminRoutes);
 app.use("/api/v3/admin/products", adminProductRoutes);
 app.use("/api/v3/admin/orders", adminOrderRoute);
 app.use("/api/v3/config", configRoutes);
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8001;
 const server = app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`.bgBlue);
 });

@@ -15,8 +15,28 @@ const cacheFilters = (duration = 3600) => {
     const key = `cache:${req.originalUrl || req.url}`;
 
     try {
+      if (req.perf) req.perf.steps.redis_start = performance.now();
+      
       const cachedData = await redisClient.get(key);
+      
+      if (req.perf) {
+        req.perf.steps.redis_duration = performance.now() - req.perf.steps.redis_start;
+        req.perf.steps.cache_status = cachedData ? 'HIT' : 'MISS';
+      }
+
       if (cachedData) {
+        if (req.perf && process.env.PERF_LOG === 'true') {
+          const totalDuration = performance.now() - req.perf.start;
+          const threshold = Number(process.env.PERF_SLOW_THRESHOLD) || 0;
+          if (totalDuration >= threshold) {
+            const serverId = process.env.HOSTNAME || process.pid;
+            console.log(`[PERF] request_start method=${req.method} path=${req.originalUrl || req.url} requestId=${req.requestId}`);
+            console.log(`[PERF] server=${serverId}`);
+            console.log(`[PERF] redis_get=${req.perf.steps.redis_duration.toFixed(2)}ms cache=HIT`);
+            console.log(`[PERF] total=${totalDuration.toFixed(2)}ms`);
+            console.log(`[PERF] request_end status=200 total=${totalDuration.toFixed(2)}ms`);
+          }
+        }
         // Send cached response
         return res.status(200).json(typeof cachedData === 'string' ? JSON.parse(cachedData) : cachedData);
       }
@@ -25,7 +45,7 @@ const cacheFilters = (duration = 3600) => {
       const originalJson = res.json;
       res.json = function (body) {
         // Store in Redis with expiration
-        redisClient.set(key, JSON.stringify(body), { ex: duration })
+        redisClient.set(key, JSON.stringify(body), { EX: duration })
           .catch(err => console.error('Redis caching error:', err));
         
         // Call the original res.json
